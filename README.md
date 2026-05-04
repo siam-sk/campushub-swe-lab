@@ -35,6 +35,15 @@ npm run dev
 
 The server provides a health check endpoint at `GET /api/health`.
 
+## Firebase auth routes
+
+The backend verifies Firebase ID tokens. Registration and login happen on the client via Firebase
+Auth, then the client sends the ID token to the API.
+
+- `POST /api/auth/register` with `{ "idToken": "..." }`
+- `POST /api/auth/login` with `{ "idToken": "..." }`
+- `GET /api/auth/me` with `Authorization: Bearer <idToken>`
+
 ## Environment variables
 
 Set the following in `server/.env`:
@@ -42,6 +51,9 @@ Set the following in `server/.env`:
 ```
 PORT=5000
 CLIENT_ORIGIN=http://localhost:5173
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
 MONGO_URI=
 JWT_SECRET=
 GOOGLE_CLIENT_ID=

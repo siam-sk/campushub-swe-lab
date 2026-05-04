@@ -1,3 +1,4 @@
+/* global process */
 import 'dotenv/config'
 import admin from 'firebase-admin'
 
