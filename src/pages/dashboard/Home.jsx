@@ -51,7 +51,6 @@ export default function DashboardHome() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
     const loadHome = async () => {
       try {
@@ -62,7 +61,7 @@ export default function DashboardHome() {
         }
 
         const userEmail = auth.currentUser.email;
-        const response = await fetch(`${apiBaseUrl}/api/dashboard/home?email=${encodeURIComponent(userEmail)}`, {
+        const response = await fetch(`/api/dashboard/home?email=${encodeURIComponent(userEmail)}`, {
           signal: controller.signal,
         });
 

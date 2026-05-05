@@ -1,0 +1,1 @@
+export { connectMongo } from '../../server/db/connectMongo.js';
