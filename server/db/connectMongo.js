@@ -18,6 +18,8 @@ export const connectMongo = async () => {
     if (!connectPromise) {
       connectPromise = mongoose.connect(mongoUri, {
         dbName: process.env.MONGODB_DB_NAME || undefined,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 5000,
       });
     }
 
