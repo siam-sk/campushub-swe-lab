@@ -92,7 +92,12 @@ export default function DashboardHome() {
         </div>
       </section>
 
-      {loading ? <div className="dashboard-loading">Loading dashboard content from MongoDB...</div> : null}
+      {loading ? (
+        <div className="dashboard-loading">
+          <div className="loading-spinner"></div>
+          <span>Loading your dashboard...</span>
+        </div>
+      ) : null}
 
       <section className="stats-grid" aria-label="Dashboard summary">
         {homeData.stats.map((stat) => (

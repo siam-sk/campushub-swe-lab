@@ -475,12 +475,32 @@
 }
 
 .dashboard-loading {
-  border: 1px solid #e5e7eb;
-  background: #fff7ed;
-  color: #9a3412;
-  border-radius: 18px;
-  padding: 12px 16px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border-200);
+  background: var(--surface-100);
+  color: var(--text-600);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border-200);
+  border-top-color: var(--primary-500);
+  border-radius: 50%;
+  animation: loading-spin 1s linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .dashboard-placeholder-panel {
