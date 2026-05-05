@@ -3,6 +3,8 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import authRoutes from './routes/auth.js'
+import dashboardRoutes from './routes/dashboard.js'
+import { connectMongo } from './db/connectMongo.js'
 
 dotenv.config()
 
@@ -14,11 +16,31 @@ app.use(cors({ origin: clientOrigin }))
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'campushub-api' })
 })
 
-app.listen(port, () => {
-  console.log(`CampusHub API running on port ${port}`)
-})
+const startServer = async () => {
+  const mongoState = await connectMongo().catch((error) => ({
+    connected: false,
+    skipped: false,
+    reason: error?.message || 'Unexpected startup error',
+  }))
+
+  app.listen(port, () => {
+    console.log(`CampusHub API running on port ${port}`)
+
+    if (mongoState.connected) {
+      console.log('MongoDB connected')
+    } else if (mongoState.skipped) {
+      console.log(`MongoDB skipped: ${mongoState.reason}`)
+    } else {
+      console.log(`MongoDB connection failed: ${mongoState.reason}`)
+      console.log('Using dashboard fallbacks')
+    }
+  })
+}
+
+startServer()

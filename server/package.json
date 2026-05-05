@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "seed:dashboard": "node seed/seedDashboardData.js",
+    "seed:firebase-users": "node seed/seedFirebaseUsers.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "firebase-admin": "^12.1.1"
+    "firebase-admin": "^12.1.1",
+    "mongoose": "^9.6.1"
   }
 }

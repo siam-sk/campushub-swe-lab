@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '../firebase';
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile,
+} from 'firebase/auth';
+import { auth, googleProvider } from '../firebase';
 
 export default function Auth() {
   const location = useLocation();
@@ -70,6 +76,23 @@ export default function Auth() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setAuthError('');
+    setAuthLoading(true);
+
+    try {
+      const provider = googleProvider || new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      await syncWithBackend(authMode === 'signup' ? 'register' : 'login', idToken);
+      navigate('/dashboard');
+    } catch (error) {
+      setAuthError(error.message || 'Unable to sign in with Google');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   return (
     <div className="auth-shell">
       <aside className="auth-panel">
@@ -108,6 +131,19 @@ export default function Auth() {
               ? 'Sign in to continue to your account'
               : 'Join the community of learners'}
           </p>
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-outline auth-submit"
+          onClick={handleGoogleLogin}
+          disabled={authLoading}
+        >
+          {authLoading ? 'Connecting...' : 'Continue with Google'}
+        </button>
+
+        <div className="auth-divider">
+          <span>OR</span>
         </div>
 
         <form onSubmit={authMode === 'login' ? handleLogin : handleSignup}>
@@ -172,10 +208,6 @@ export default function Auth() {
                 : 'Create Account'}
           </button>
         </form>
-
-        <div className="auth-divider">
-          <span>OR</span>
-        </div>
 
         <div className="auth-footer">
           {authMode === 'login' ? (
