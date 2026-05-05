@@ -1,66 +1,103 @@
 # CampusHub
 
-CampusHub is a MERN-based campus platform for learning resources, notices, events, and community.
+CampusHub is a modern MERN-based campus platform serving learning resources, notices, events, and community features. The application uses React+Vite for the frontend, Express/Vercel Serverless for the backend API, MongoDB Atlas for the database, and Firebase for authentication.
 
-## Folder structure
+## 📂 Project Structure
 
-```
+```text
 campushub-swe-lab/
-	server/
-		index.js
-		package.json
-		.env.example
-		routes/
-		models/
-		middleware/
-	src/
-	public/
+├── api/                  # Vercel Serverless API routes (Production Backend)
+├── server/               # Local Express server, MongoDB models, and Seeding scripts
+│   ├── db/
+│   ├── models/
+│   ├── routes/
+│   └── seed/             # Database & Firebase test data seeds
+├── src/                  # React Frontend (Vite)
+│   ├── components/
+│   ├── layouts/
+│   ├── pages/
+│   └── App.jsx
+├── public/               # Static assets
+├── index.html            # Vite entry point
+└── vercel.json           # Vercel deployment configuration
 ```
 
-## Client setup
+## 🚀 Local Development Setup
+
+### 1. Environment Variables
+
+Create `.env` file inside the `/server` directory:
+
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_atlas_connection_string
+FIREBASE_PROJECT_ID=your_firebase_project_id
+FIREBASE_CLIENT_EMAIL=your_firebase_client_email
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+_(Note: Be sure to preserve the `\n` newlines exactly as they appear in your `.env` for the Firebase private key)._
+
+### 2. Install Dependencies
+
+Install frontend dependencies:
 
 ```bash
 npm install
-npm run dev
 ```
 
-## Server setup
+Install backend dependencies:
 
 ```bash
 cd server
 npm install
-cp .env.example .env
+```
+
+### 3. Seed Database and Test Users
+
+To populate the database with dummy students and dashboard data:
+
+```bash
+cd server
+npm run seed:dashboard
+npm run seed:firebase-users
+```
+
+**Test Accounts:**
+
+- **Email:** `john.student@campushub.edu`, `tanvir.hasan@campushub.edu`, etc.
+- **Password:** `CampusHub@123`
+
+### 4. Run the Application
+
+Start the backend server (runs on `http://localhost:5000`):
+
+```bash
+cd server
 npm run dev
 ```
 
-The server provides a health check endpoint at `GET /api/health`.
+In a new terminal, start the frontend Vite server (runs on `http://localhost:5173` and proxies `/api` to the backend):
 
-## Firebase auth routes
-
-The backend verifies Firebase ID tokens. Registration and login happen on the client via Firebase
-Auth, then the client sends the ID token to the API.
-
-- `POST /api/auth/register` with `{ "idToken": "..." }`
-- `POST /api/auth/login` with `{ "idToken": "..." }`
-- `GET /api/auth/me` with `Authorization: Bearer <idToken>`
-
-## Environment variables
-
-Set the following in `server/.env`:
-
-```
-PORT=5000
-CLIENT_ORIGIN=http://localhost:5173
-FIREBASE_PROJECT_ID=
-FIREBASE_CLIENT_EMAIL=
-FIREBASE_PRIVATE_KEY=
-MONGO_URI=
-JWT_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
+```bash
+npm run dev
 ```
 
-## Team workflow
+## ☁️ Deployment (Vercel)
 
-- Each teammate works on their own branch and commits after each logical change.
-- Create PRs to merge into `main`.
+This project is configured to be deployed as a monolithic full-stack app on **Vercel**.
+
+1. Connect your GitHub repository to Vercel.
+2. The framework preset should automatically be detected as **Vite**.
+3. In the Vercel **Environment Variables** settings, add the keys from your `server/.env` (`MONGODB_URI`, `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`).
+4. In your **MongoDB Atlas Dashboard**, make sure to add `0.0.0.0/0` (Allow Access from Anywhere) under **Network Access** so Vercel's dynamic IPs can connect.
+5. Deploy. The frontend will build via Vite, and APIs will be automatically deployed as Vercel Serverless Functions from the `/api` directory.
+
+## 🔐 Auth Handlers
+
+Authentication works by validating Firebase ID tokens on the backend using the Admin SDK:
+
+- `POST /api/auth/register` - Registers a new user.
+- `POST /api/auth/login` - Logs in an existing user.
+- `GET /api/auth/me` - Validates the `Authorization: Bearer <idToken>` token.
+- `GET /api/dashboard/home?email=...` - Fetches personalized user dashboard stats from MongoDB.
