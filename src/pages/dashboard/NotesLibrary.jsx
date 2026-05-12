@@ -30,8 +30,6 @@ const notes = [
     date: '01/01/2026',
     downloads: 189,
     rating: 4.6,
-    premium: true,
-    price: 199,
     accent: 'green',
   },
   {
@@ -56,8 +54,6 @@ const notes = [
     date: '01/12/2026',
     downloads: 201,
     rating: 4.5,
-    premium: true,
-    price: 199,
     accent: 'orange',
   },
 ];
@@ -79,17 +75,6 @@ export default function NotesLibrary() {
           <p>Access high-quality study materials shared by your peers</p>
         </div>
         <button type="button" className="notes-upload">Upload Notes</button>
-      </section>
-
-      <section className="notes-premium">
-        <div className="notes-premium-copy">
-          <span className="notes-premium-icon">👑</span>
-          <div>
-            <strong>Unlock Premium Notes</strong>
-            <p>Get access to expert-curated study materials and ace your exams!</p>
-          </div>
-        </div>
-        <button type="button" className="notes-premium-btn">Subscribe Now</button>
       </section>
 
       <section className="notes-search-row">
@@ -121,10 +106,6 @@ export default function NotesLibrary() {
               <div>
                 <span>Total Notes</span>
                 <strong>245</strong>
-              </div>
-              <div>
-                <span>Premium Notes</span>
-                <strong className="premium-count">89</strong>
               </div>
             </div>
           </div>
@@ -166,9 +147,6 @@ export default function NotesLibrary() {
                 <div className="note-card-stats">
                   <span>⬇ {note.downloads}</span>
                   <span>★ {note.rating}</span>
-                  {note.premium ? (
-                    <span className="note-price">BDT {note.price}</span>
-                  ) : null}
                 </div>
 
                 <div className="note-actions">
@@ -176,11 +154,9 @@ export default function NotesLibrary() {
                     Preview
                   </button>
                   <button type="button" className="note-action primary">
-                    {note.premium ? `Unlock Now - BDT ${note.price}` : 'Download'}
+                    Download
                   </button>
                 </div>
-
-                {note.premium ? <span className="note-premium">Premium</span> : null}
               </article>
             ))}
           </div>

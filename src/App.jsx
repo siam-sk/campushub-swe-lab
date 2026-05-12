@@ -25,7 +25,8 @@ function App() {
             </RequireRole>
           }
         >
-          <Route index element={<CoursesPage />} />
+          <Route index element={<DashboardHome />} />
+          <Route path="courses" element={<CoursesPage />} />
           <Route
             path="notice-board"
             element={<NoticeBoard />}
@@ -65,16 +66,6 @@ function App() {
                 title="Club"
                 eyebrow="Student clubs"
                 description="Club memberships, events, and member tools will be wired in this section."
-              />
-            }
-          />
-          <Route
-            path="premium"
-            element={
-              <DashboardSectionPage
-                title="Premium"
-                eyebrow="Upgrade area"
-                description="Premium tools and future paid features will be defined once the dashboard pages are finalized."
               />
             }
           />

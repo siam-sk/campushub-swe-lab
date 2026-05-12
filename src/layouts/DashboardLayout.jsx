@@ -6,13 +6,13 @@ import useProfile from '../hooks/useProfile';
 
 const sidebarItems = [
   { label: 'Dashboard', to: '/dashboard', end: true },
+  { label: 'My Courses', to: '/dashboard/courses' },
   { label: 'Notice Board', to: '/dashboard/notice-board', badge: '5' },
   { label: 'Notes Library', to: '/dashboard/notes-library' },
   { label: 'Messages', to: '/dashboard/messages', badge: '3' },
   { label: 'Community', to: '/dashboard/community' },
   { label: 'Profile', to: '/dashboard/profile' },
   { label: 'Club', to: '/dashboard/club' },
-  { label: 'Premium', to: '/dashboard/premium' },
 ];
 
 const featureTools = ['Job Board', 'Mock Tests', 'Live Classes', 'AI Assistant'];
