@@ -5,8 +5,16 @@ import DashboardHome from './pages/dashboard/Home';
 import CoursesPage from './pages/dashboard/Courses';
 import NotesLibrary from './pages/dashboard/NotesLibrary';
 import Messages from './pages/dashboard/Messages';
-import DashboardSectionPage from './pages/dashboard/SectionPage';
 import NoticeBoard from './pages/dashboard/NoticeBoard';
+import ProfilePage from './pages/dashboard/Profile';
+import ClubsPage from './pages/dashboard/Clubs';
+import JobBoardPage from './pages/dashboard/JobBoard';
+import MockTestsPage from './pages/dashboard/MockTests';
+import LiveClassesPage from './pages/dashboard/LiveClasses';
+import AssistantPage from './pages/dashboard/Assistant';
+import AlumniPage from './pages/dashboard/Alumni';
+import ScholarshipsPage from './pages/dashboard/Scholarships';
+import SettingsPage from './pages/dashboard/Settings';
 import Landing from './pages/Landing';
 import RequireRole from './components/RequireRole';
 import './App.css';
@@ -40,35 +48,20 @@ function App() {
             element={<Messages />}
           />
           <Route
-            path="community"
-            element={
-              <DashboardSectionPage
-                title="Community"
-                eyebrow="Campus network"
-                description="Clubs, communities, and student groups will be added in the next page pass."
-              />
-            }
-          />
-          <Route
             path="profile"
-            element={
-              <DashboardSectionPage
-                title="Profile"
-                eyebrow="Student profile"
-                description="Profile details, academic settings, and account preferences will live here."
-              />
-            }
+            element={<ProfilePage />}
           />
           <Route
             path="club"
-            element={
-              <DashboardSectionPage
-                title="Club"
-                eyebrow="Student clubs"
-                description="Club memberships, events, and member tools will be wired in this section."
-              />
-            }
+            element={<ClubsPage />}
           />
+          <Route path="job-board" element={<JobBoardPage />} />
+          <Route path="mock-tests" element={<MockTestsPage />} />
+          <Route path="live-classes" element={<LiveClassesPage />} />
+          <Route path="ai-assistant" element={<AssistantPage />} />
+          <Route path="alumni" element={<AlumniPage />} />
+          <Route path="scholarships" element={<ScholarshipsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>

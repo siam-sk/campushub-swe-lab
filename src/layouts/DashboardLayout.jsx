@@ -10,12 +10,19 @@ const sidebarItems = [
   { label: 'Notice Board', to: '/dashboard/notice-board', badge: '5' },
   { label: 'Notes Library', to: '/dashboard/notes-library' },
   { label: 'Messages', to: '/dashboard/messages', badge: '3' },
-  { label: 'Community', to: '/dashboard/community' },
   { label: 'Profile', to: '/dashboard/profile' },
   { label: 'Club', to: '/dashboard/club' },
+  { label: 'Settings', to: '/dashboard/settings' },
 ];
 
-const featureTools = ['Job Board', 'Mock Tests', 'Live Classes', 'AI Assistant'];
+const featureTools = [
+  { label: 'Job Board', to: '/dashboard/job-board', badge: 'New' },
+  { label: 'Mock Tests', to: '/dashboard/mock-tests', badge: 'New' },
+  { label: 'Live Classes', to: '/dashboard/live-classes', badge: 'New' },
+  { label: 'AI Assistant', to: '/dashboard/ai-assistant', badge: 'New' },
+  { label: 'Alumni Network', to: '/dashboard/alumni', badge: 'New' },
+  { label: 'Scholarships', to: '/dashboard/scholarships', badge: 'New' },
+];
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -82,10 +89,14 @@ export default function DashboardLayout() {
           <div className="sidebar-section-title">NEW FEATURES</div>
           <div className="sidebar-tools">
             {featureTools.map((tool) => (
-              <button key={tool} type="button" className="sidebar-tool">
-                <span>{tool}</span>
-                <span className="sidebar-new">New</span>
-              </button>
+              <NavLink
+                key={tool.label}
+                to={tool.to}
+                className={({ isActive }) => `sidebar-item sidebar-tool ${isActive ? 'active' : ''}`}
+              >
+                <span>{tool.label}</span>
+                <span className="sidebar-new">{tool.badge}</span>
+              </NavLink>
             ))}
           </div>
         </div>
