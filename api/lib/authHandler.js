@@ -1,11 +1,51 @@
 import admin from './firebaseAdmin.js';
+import { connectMongo } from './connectMongo.js';
+import UserProfile from '../../server/models/UserProfile.js';
 
-const getUserPayload = (decoded) => ({
+const buildUserPayload = (decoded, profile) => ({
   uid: decoded.uid,
   email: decoded.email,
-  name: decoded.name || decoded.email,
+  name: profile?.fullName || decoded.name || decoded.email,
   picture: decoded.picture || null,
+  role: profile?.role || 'student',
+  profile: profile
+    ? {
+        fullName: profile.fullName,
+        role: profile.role,
+        department: profile.department,
+        year: profile.year,
+        semester: profile.semester,
+        gpa: profile.gpa,
+        avatarUrl: profile.avatarUrl,
+      }
+    : null,
 });
+
+const ensureUserProfile = async (decoded) => {
+  const fullName = decoded.name || decoded.email || 'Student';
+  const update = {
+    email: decoded.email,
+    avatarUrl: decoded.picture || '',
+  };
+
+  if (decoded.name) {
+    update.fullName = decoded.name;
+  }
+
+  const profile = await UserProfile.findOneAndUpdate(
+    { uid: decoded.uid },
+    {
+      $set: update,
+      $setOnInsert: {
+        fullName,
+        role: 'student',
+      },
+    },
+    { new: true, upsert: true },
+  ).lean();
+
+  return profile;
+};
 
 export const handleAuthAction = async (req, res, action) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -26,7 +66,9 @@ export const handleAuthAction = async (req, res, action) => {
       }
 
       const decoded = await admin.auth().verifyIdToken(token);
-      return res.json({ user: getUserPayload(decoded) });
+      await connectMongo();
+      const profile = await UserProfile.findOne({ uid: decoded.uid }).lean();
+      return res.json({ user: buildUserPayload(decoded, profile) });
     }
 
     const { idToken } = req.body || {};
@@ -36,10 +78,12 @@ export const handleAuthAction = async (req, res, action) => {
     }
 
     const decoded = await admin.auth().verifyIdToken(idToken);
+    await connectMongo();
+    const profile = await ensureUserProfile(decoded);
 
     return res.status(action === 'register' ? 201 : 200).json({
       message: action === 'register' ? 'Registration verified' : 'Login verified',
-      user: getUserPayload(decoded),
+      user: buildUserPayload(decoded, profile),
     });
   } catch (error) {
     return res.status(401).json({

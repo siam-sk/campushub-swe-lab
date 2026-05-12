@@ -1,5 +1,6 @@
 import DashboardHome from '../../server/models/DashboardHome.js';
 import StudentUser from '../../server/models/StudentUser.js';
+import UserProfile from '../../server/models/UserProfile.js';
 
 const fallbackHome = {
   key: 'home',
@@ -28,14 +29,14 @@ const fallbackHome = {
   ],
 };
 
-const buildUserHome = (student) => ({
-  greetingName: student.fullName.split(' ')[0],
+const buildUserHome = (profile) => ({
+  greetingName: profile.fullName.split(' ')[0],
   greetingMessage: "Here's what's happening with your studies today",
   stats: [
-    { title: 'My Courses', value: String(student.dashboardMeta?.coursesEnrolled || 0), note: 'Enrolled', icon: '📘', accent: 'blue' },
-    { title: 'New Notices', value: String(student.dashboardMeta?.noticesUnread || 0), note: 'Unread', icon: '🔔', accent: 'orange' },
-    { title: 'Messages', value: String(student.dashboardMeta?.messagesUnread || 0), note: 'New', icon: '💬', accent: 'green' },
-    { title: 'GPA', value: (student.gpa || 0).toFixed(2), note: student.year, icon: '📈', accent: 'purple' },
+    { title: 'My Courses', value: String(profile.dashboardMeta?.coursesEnrolled || 0), note: 'Enrolled', icon: '📘', accent: 'blue' },
+    { title: 'New Notices', value: String(profile.dashboardMeta?.noticesUnread || 0), note: 'Unread', icon: '🔔', accent: 'orange' },
+    { title: 'Messages', value: String(profile.dashboardMeta?.messagesUnread || 0), note: 'New', icon: '💬', accent: 'green' },
+    { title: 'GPA', value: (profile.gpa || 0).toFixed(2), note: profile.year || profile.role, icon: '📈', accent: 'purple' },
   ],
   courses: fallbackHome.courses,
   notices: fallbackHome.notices,
@@ -47,11 +48,24 @@ export default async function handler(req, res) {
 
   try {
     if (userEmail) {
-      const student = await StudentUser.findOne({ email: userEmail }).lean();
+      const profile = await UserProfile.findOne({ email: userEmail }).lean();
+      if (profile) {
+        return res.json({
+          page: buildUserHome(profile),
+          source: 'mongodb-profile',
+        });
+      }
 
+      const student = await StudentUser.findOne({ email: userEmail }).lean();
       if (student) {
         return res.json({
-          page: buildUserHome(student),
+          page: buildUserHome({
+            fullName: student.fullName,
+            dashboardMeta: student.dashboardMeta,
+            gpa: student.gpa,
+            year: student.year,
+            role: 'student',
+          }),
           source: 'mongodb-user',
         });
       }

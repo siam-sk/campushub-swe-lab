@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
+import useProfile from '../hooks/useProfile';
 
 const sidebarItems = [
   { label: 'Dashboard', to: '/dashboard', end: true },
@@ -17,6 +19,32 @@ const featureTools = ['Job Board', 'Mock Tests', 'Live Classes', 'AI Assistant']
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const { profile } = useProfile();
+  const profileName =
+    profile?.name ||
+    profile?.fullName ||
+    auth.currentUser?.displayName ||
+    auth.currentUser?.email?.split('@')[0] ||
+    'Student';
+  const profileMeta =
+    profile?.profile?.department && profile?.profile?.year
+      ? `${profile.profile.department}, ${profile.profile.year}`
+      : profile?.role
+        ? `${profile.role.charAt(0).toUpperCase()}${profile.role.slice(1)}`
+        : profile?.email || auth.currentUser?.email || '';
+
+  const profileInitials = useMemo(() => {
+    if (!profileName) {
+      return 'ST';
+    }
+
+    const parts = profileName.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }, [profileName]);
 
   const handleLogout = async () => {
     try {
@@ -63,10 +91,10 @@ export default function DashboardLayout() {
         </div>
 
         <button type="button" className="profile-card" onClick={() => navigate('/dashboard/profile')}>
-          <span className="profile-avatar">JS</span>
+          <span className="profile-avatar">{profileInitials}</span>
           <span>
-            <strong>John Student</strong>
-            <small>CSE, 3rd Year</small>
+            <strong>{profileName}</strong>
+            <small>{profileMeta || 'CSE, 3rd Year'}</small>
           </span>
         </button>
 

@@ -2,8 +2,13 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Auth from './pages/Auth';
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardHome from './pages/dashboard/Home';
+import CoursesPage from './pages/dashboard/Courses';
+import NotesLibrary from './pages/dashboard/NotesLibrary';
+import Messages from './pages/dashboard/Messages';
 import DashboardSectionPage from './pages/dashboard/SectionPage';
+import NoticeBoard from './pages/dashboard/NoticeBoard';
 import Landing from './pages/Landing';
+import RequireRole from './components/RequireRole';
 import './App.css';
 
 function App() {
@@ -12,37 +17,26 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<DashboardHome />} />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireRole allowedRoles={['student', 'faculty', 'admin']}>
+              <DashboardLayout />
+            </RequireRole>
+          }
+        >
+          <Route index element={<CoursesPage />} />
           <Route
             path="notice-board"
-            element={
-              <DashboardSectionPage
-                title="Notice Board"
-                eyebrow="All campus updates"
-                description="Announcements, exam changes, deadlines, and faculty notices will live here."
-              />
-            }
+            element={<NoticeBoard />}
           />
           <Route
             path="notes-library"
-            element={
-              <DashboardSectionPage
-                title="Notes Library"
-                eyebrow="Study materials"
-                description="Shared notes, PDFs, and revision packs will be organized in this section."
-              />
-            }
+            element={<NotesLibrary />}
           />
           <Route
             path="messages"
-            element={
-              <DashboardSectionPage
-                title="Messages"
-                eyebrow="Peer communication"
-                description="Direct messages, class chats, and group discussions will appear here."
-              />
-            }
+            element={<Messages />}
           />
           <Route
             path="community"
