@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth?action=$1"
+    },
+    {
       "source": "/api/alumni/(.*)",
       "destination": "/api/alumni?action=$1"
     },
