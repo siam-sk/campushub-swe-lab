@@ -1,12 +1,24 @@
 # CampusHub
 
-CampusHub is a modern MERN-based campus platform serving learning resources, notices, events, and community features. The application uses React+Vite for the frontend, Express/Vercel Serverless for the backend API, MongoDB Atlas for the database, and Firebase for authentication.
+CampusHub is a modern MERN-based campus platform serving learning resources, notices, events, and community features. The application uses React+Vite for the frontend, Express/Vercel Serverless for backend APIs.
 
 ## 📂 Project Structure
 
 ```text
 campushub-swe-lab/
 ├── api/                  # Vercel Serverless API routes (Production Backend)
+│   ├── alumni/
+│   ├── assistant/
+│   ├── auth/
+│   ├── clubs/
+│   ├── dashboard/
+│   ├── jobs/
+│   ├── live-classes/
+│   ├── notices/
+│   ├── profile/
+│   ├── scholarships/
+│   ├── settings/
+│   └── tests/
 ├── server/               # Local Express server, MongoDB models, and Seeding scripts
 │   ├── db/
 │   ├── models/
@@ -93,11 +105,30 @@ This project is configured to be deployed as a monolithic full-stack app on **Ve
 4. In your **MongoDB Atlas Dashboard**, make sure to add `0.0.0.0/0` (Allow Access from Anywhere) under **Network Access** so Vercel's dynamic IPs can connect.
 5. Deploy. The frontend will build via Vite, and APIs will be automatically deployed as Vercel Serverless Functions from the `/api` directory.
 
-## 🔐 Auth Handlers
+## 🔐 Available APIs
 
-Authentication works by validating Firebase ID tokens on the backend using the Admin SDK:
+Here is a list of API routes available in the system:
 
+**Auth Handlers** (`/api/auth`)
 - `POST /api/auth/register` - Registers a new user.
 - `POST /api/auth/login` - Logs in an existing user.
 - `GET /api/auth/me` - Validates the `Authorization: Bearer <idToken>` token.
+
+**Dashboard APIs** (`/api/dashboard`)
 - `GET /api/dashboard/home?email=...` - Fetches personalized user dashboard stats from MongoDB.
+- `GET /api/dashboard/students` - Fetches a list of student profiles.
+
+**Notices API** (`/api/notices`)
+- `GET /api/notices?category=...&q=...` - Fetches a list of notices, with optional category and search query filters.
+- `POST /api/notices` - Creates a new notice (requires faculty/admin role).
+
+**Other Features (Vercel Serverless / Vercel API Folder)**
+- `/api/alumni` - Alumni directory and request handling.
+- `/api/assistant` - AI Study Assistant API logic.
+- `/api/clubs` - Club directory and join handling.
+- `/api/jobs` - Job Board API endpoints.
+- `/api/live-classes` - Live class scheduling APIs.
+- `/api/profile` - Profile management APIs.
+- `/api/scholarships` - Scholarship directory APIs.
+- `/api/settings` - Account settings APIs.
+- `/api/tests` - Mock test logic APIs.
