@@ -2,6 +2,34 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/alumni/(.*)",
+      "destination": "/api/alumni?action=$1"
+    },
+    {
+      "source": "/api/clubs/(.*)",
+      "destination": "/api/clubs?action=$1"
+    },
+    {
+      "source": "/api/dashboard/(.*)",
+      "destination": "/api/dashboard?action=$1"
+    },
+    {
+      "source": "/api/jobs/(.*)",
+      "destination": "/api/jobs?action=$1"
+    },
+    {
+      "source": "/api/live-classes/(.*)",
+      "destination": "/api/live-classes?action=$1"
+    },
+    {
+      "source": "/api/scholarships/(.*)",
+      "destination": "/api/scholarships?action=$1"
+    },
+    {
+      "source": "/api/tests/(.*)",
+      "destination": "/api/tests?action=$1"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },

@@ -1,4 +1,4 @@
-import { connectMongo } from '../lib/connectMongo.js';
+import { connectMongo } from '../../lib/connectMongo.js';
 import AssistantMessage from '../../server/models/AssistantMessage.js';
 
 const fallbackMessages = [

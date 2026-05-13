@@ -1,4 +1,4 @@
-import { connectMongo } from '../lib/connectMongo.js';
+import { connectMongo } from '../../lib/connectMongo.js';
 import AlumniProfile from '../../server/models/AlumniProfile.js';
 
 const fallbackAlumni = [
@@ -66,6 +66,21 @@ const fallbackAlumni = [
 
 export default async function handler(req, res) {
   await connectMongo();
+
+  const action = req.query.action?.[0] || req.query.action;
+  if (action === 'request') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { alumniId } = req.body || {};
+    if (!alumniId) {
+      return res.status(400).json({ message: 'alumniId is required' });
+    }
+
+    const profile = await AlumniProfile.findById(alumniId).lean();
+    return res.json({ message: 'Mentorship request sent', profile });
+  }
 
   if (req.method === 'GET') {
     const alumni = await AlumniProfile.find().sort({ createdAt: -1 }).lean();

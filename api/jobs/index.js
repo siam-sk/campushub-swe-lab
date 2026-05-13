@@ -1,5 +1,6 @@
-import { connectMongo } from '../lib/connectMongo.js';
+import { connectMongo } from '../../lib/connectMongo.js';
 import Job from '../../server/models/Job.js';
+import JobApplication from '../../server/models/JobApplication.js';
 
 const fallbackJobs = [
   {
@@ -50,6 +51,21 @@ const fallbackJobs = [
 
 export default async function handler(req, res) {
   await connectMongo();
+
+  const action = req.query.action?.[0] || req.query.action;
+  if (action === 'apply') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { jobId, name, email, resumeUrl } = req.body || {};
+    if (!jobId) {
+      return res.status(400).json({ message: 'jobId is required' });
+    }
+
+    const application = await JobApplication.create({ jobId, name, email, resumeUrl });
+    return res.status(201).json({ application });
+  }
 
   if (req.method === 'GET') {
     const jobs = await Job.find().sort({ createdAt: -1 }).lean();

@@ -1,5 +1,5 @@
-import admin from '../lib/firebaseAdmin.js';
-import { connectMongo } from '../lib/connectMongo.js';
+import admin from '../../lib/firebaseAdmin.js';
+import { connectMongo } from '../../lib/connectMongo.js';
 import Notice from '../../server/models/Notice.js';
 import UserProfile from '../../server/models/UserProfile.js';
 

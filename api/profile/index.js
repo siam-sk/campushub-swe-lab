@@ -1,4 +1,4 @@
-import { connectMongo } from '../lib/connectMongo.js';
+import { connectMongo } from '../../lib/connectMongo.js';
 import ProfilePage from '../../server/models/ProfilePage.js';
 
 const fallbackProfile = {
