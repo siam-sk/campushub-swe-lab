@@ -132,3 +132,10 @@ Here is a list of API routes available in the system:
 - `/api/scholarships` - Scholarship directory APIs.
 - `/api/settings` - Account settings APIs.
 - `/api/tests` - Mock test logic APIs.
+
+## Demo Area bypass
+Since backend auth is bypassed for showcase/demo purposes, you can dynamically switch roles directly from the Login/Signup page by entering specific emails in the "Email Address" field (passwords can be anything).
+
+- **Student Dashboard**: Use `student@campushub.edu`
+- **Faculty Dashboard**: Use `faculty@campushub.edu`
+- **Admin Dashboard**: Use `admin@campushub.edu`

@@ -35,17 +35,28 @@ export default function Auth() {
     setAuthForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const setMockRole = () => {
+    let role = 'student';
+    const email = authForm.email.toLowerCase();
+    if (email.includes('faculty')) role = 'faculty';
+    if (email.includes('admin')) role = 'admin';
+    localStorage.setItem('mockUserRole', role);
+  };
+
   const handleLogin = async (event) => {
     event.preventDefault();
+    setMockRole();
     navigate('/dashboard');
   };
 
   const handleSignup = async (event) => {
     event.preventDefault();
+    setMockRole();
     navigate('/dashboard');
   };
 
   const handleGoogleLogin = async () => {
+    setMockRole();
     navigate('/dashboard');
   };
 

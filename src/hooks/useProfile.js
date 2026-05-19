@@ -5,12 +5,15 @@ import { useEffect, useState } from 'react';
 // const emptyState = { profile: null, loading: true, error: '' };
 
 export default function useProfile() {
+  const role = localStorage.getItem('mockUserRole') || 'student';
+  const fullName = role.charAt(0).toUpperCase() + role.slice(1);
+  
   return { 
     profile: { 
-      uid: 'fake_admin_uid', 
-      email: 'admin@campushub.edu', 
-      fullName: 'Mock Admin', 
-      role: 'admin' 
+      uid: `fake_${role}_uid`, 
+      email: `${role}@campushub.edu`, 
+      fullName: `Mock ${fullName}`, 
+      role: role 
     }, 
     loading: false, 
     error: '' 
