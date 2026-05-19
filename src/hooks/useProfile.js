@@ -19,6 +19,3 @@ export default function useProfile() {
     error: '' 
   };
 }
-
-  return state;
-}
