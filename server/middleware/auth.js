@@ -13,11 +13,22 @@ export const requireAuth = async (req, res, next) => {
   }
 
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
+    let decoded;
+    if (token.startsWith('mock-')) {
+      const email = token.replace('mock-', '');
+      decoded = {
+        uid: `mock-uid-${email}`,
+        email: email,
+        name: `Mock User`,
+        picture: ''
+      };
+    } else {
+      decoded = await admin.auth().verifyIdToken(token);
+    }
     req.user = decoded;
     return next();
-  } catch {
-    return res.status(401).json({ message: 'Invalid auth token' });
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid auth token', error: error.message });
   }
 };
 

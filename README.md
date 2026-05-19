@@ -115,7 +115,7 @@ Here is a list of API routes available in the system:
 - `GET /api/auth/me` - Validates the `Authorization: Bearer <idToken>` token.
 
 **Dashboard APIs** (`/api/dashboard`)
-- `GET /api/dashboard/home?email=...` - Fetches personalized user dashboard stats from MongoDB.
+- `GET /api/dashboard/home?email=...` - Fetches personalized user dashboard stats, courses, notices, and events from seeded data in MongoDB.
 - `GET /api/dashboard/students` - Fetches a list of student profiles.
 
 **Notices API** (`/api/notices`)

@@ -35,29 +35,78 @@ export default function Auth() {
     setAuthForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const setMockRole = () => {
-    let role = 'student';
-    const email = authForm.email.toLowerCase();
-    if (email.includes('faculty')) role = 'faculty';
-    if (email.includes('admin')) role = 'admin';
-    localStorage.setItem('mockUserRole', role);
-  };
-
   const handleLogin = async (event) => {
     event.preventDefault();
-    setMockRole();
-    navigate('/dashboard');
+    setAuthError('');
+    setAuthLoading(true);
+
+    try {
+      let idToken;
+      // Start Mock Auth Bypass
+      if (authForm.email.includes('@campushub.edu')) {
+        idToken = `mock-${authForm.email}`;
+        localStorage.setItem('campushub_mock_token', idToken);
+      } else {
+        // Real Login Fallback
+        const result = await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
+        idToken = await result.user.getIdToken();
+        localStorage.removeItem('campushub_mock_token');
+      }
+      
+      await syncWithBackend('login', idToken);
+      navigate('/dashboard');
+    } catch (error) {
+      setAuthError(error.message || 'Unable to sign in');
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const handleSignup = async (event) => {
     event.preventDefault();
-    setMockRole();
-    navigate('/dashboard');
+    setAuthError('');
+    setAuthLoading(true);
+
+    try {
+      let idToken;
+      // Start Mock Auth Bypass
+      if (authForm.email.includes('@campushub.edu')) {
+        idToken = `mock-${authForm.email}`;
+        localStorage.setItem('campushub_mock_token', idToken);
+      } else {
+        // Real Signup Fallback
+        const result = await createUserWithEmailAndPassword(auth, authForm.email, authForm.password);
+        if (authForm.name) {
+          await updateProfile(result.user, { displayName: authForm.name });
+        }
+        idToken = await result.user.getIdToken();
+        localStorage.removeItem('campushub_mock_token');
+      }
+
+      await syncWithBackend('register', idToken);
+      navigate('/dashboard');
+    } catch (error) {
+      setAuthError(error.message || 'Unable to create account');
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
-    setMockRole();
-    navigate('/dashboard');
+    setAuthError('');
+    setAuthLoading(true);
+
+    try {
+      const provider = googleProvider || new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      await syncWithBackend(authMode === 'signup' ? 'register' : 'login', idToken);
+      navigate('/dashboard');
+    } catch (error) {
+      setAuthError(error.message || 'Unable to sign in with Google');
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   return (

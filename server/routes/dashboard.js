@@ -54,6 +54,13 @@ router.get('/home', async (req, res) => {
   try {
     const userEmail = req.query.email;
 
+    // Fetch dashboard home to replace hardcoded fallbacks if data exists
+    const dashboardHome = await DashboardHome.findOne({ key: 'home' }).lean();
+    
+    const dbCourses = dashboardHome?.courses?.length ? dashboardHome.courses : fallbackHome.courses;
+    const dbNotices = dashboardHome?.notices?.length ? dashboardHome.notices : fallbackHome.notices;
+    const dbEvents = dashboardHome?.events?.length ? dashboardHome.events : fallbackHome.events;
+
     const buildUserHome = (profile) => ({
       greetingName: profile.fullName.split(' ')[0],
       greetingMessage: "Here's what's happening with your studies today",
@@ -87,9 +94,9 @@ router.get('/home', async (req, res) => {
           accent: 'purple',
         },
       ],
-      courses: fallbackHome.courses,
-      notices: fallbackHome.notices,
-      events: fallbackHome.events,
+      courses: dbCourses,
+      notices: dbNotices,
+      events: dbEvents,
     });
 
     // If user email provided, fetch their specific student data
@@ -118,8 +125,6 @@ router.get('/home', async (req, res) => {
     }
 
     // Fall back to generic home data
-    const dashboardHome = await DashboardHome.findOne({ key: 'home' }).lean();
-
     return res.json({
       page: dashboardHome || fallbackHome,
       source: dashboardHome ? 'mongodb' : 'fallback',
