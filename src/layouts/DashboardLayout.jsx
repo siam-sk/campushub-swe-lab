@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import useProfile from '../hooks/useProfile';
 
-const sidebarItems = [
+const defaultSidebarItems = [
   { label: 'Dashboard', to: '/dashboard', end: true },
   { label: 'My Courses', to: '/dashboard/courses' },
   { label: 'Notice Board', to: '/dashboard/notice-board', badge: '5' },
@@ -15,7 +15,7 @@ const sidebarItems = [
   { label: 'Settings', to: '/dashboard/settings' },
 ];
 
-const featureTools = [
+const defaultFeatureTools = [
   { label: 'Job Board', to: '/dashboard/job-board', badge: 'New' },
   { label: 'Mock Tests', to: '/dashboard/mock-tests', badge: 'New' },
   { label: 'Live Classes', to: '/dashboard/live-classes', badge: 'New' },
@@ -24,9 +24,42 @@ const featureTools = [
   { label: 'Scholarships', to: '/dashboard/scholarships', badge: 'New' },
 ];
 
+const facultySidebarItems = [
+  { label: 'Dashboard', to: '/dashboard', end: true },
+  { label: 'Teaching Courses', to: '/dashboard/courses' },
+  { label: 'Notice Board', to: '/dashboard/notice-board', badge: '2' },
+  { label: 'Messages', to: '/dashboard/messages', badge: '1' },
+  { label: 'Profile', to: '/dashboard/profile' },
+  { label: 'Settings', to: '/dashboard/settings' },
+];
+
+const facultyFeatureTools = [
+  { label: 'Live Classes', to: '/dashboard/live-classes', badge: 'Host' },
+  { label: 'AI Assistant', to: '/dashboard/ai-assistant', badge: 'New' },
+  { label: 'Alumni Network', to: '/dashboard/alumni', badge: 'New' },
+];
+
+const adminSidebarItems = [
+  { label: 'Dashboard', to: '/dashboard', end: true },
+  { label: 'Notice Board', to: '/dashboard/notice-board' },
+  { label: 'Messages', to: '/dashboard/messages' },
+  { label: 'Profile', to: '/dashboard/profile' },
+  { label: 'Settings', to: '/dashboard/settings' },
+];
+
+const adminFeatureTools = [
+  { label: 'AI Assistant', to: '/dashboard/ai-assistant' },
+];
+
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const { profile } = useProfile();
+  
+  const isFaculty = profile?.role === 'faculty';
+  const isAdmin = profile?.role === 'admin';
+  
+  const sidebarItems = isAdmin ? adminSidebarItems : isFaculty ? facultySidebarItems : defaultSidebarItems;
+  const featureTools = isAdmin ? adminFeatureTools : isFaculty ? facultyFeatureTools : defaultFeatureTools;
   const profileName =
     profile?.name ||
     profile?.fullName ||

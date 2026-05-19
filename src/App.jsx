@@ -17,7 +17,22 @@ import ScholarshipsPage from './pages/dashboard/Scholarships';
 import SettingsPage from './pages/dashboard/Settings';
 import Landing from './pages/Landing';
 import RequireRole from './components/RequireRole';
+import useProfile from './hooks/useProfile';
+import FacultyHome from './pages/dashboard/FacultyHome';
+import FacultyCourses from './pages/dashboard/FacultyCourses';
+import AdminHome from './pages/dashboard/AdminHome';
 import './App.css';
+
+function DashboardHomeWrapper() {
+  const { profile } = useProfile();
+  if (profile?.role === 'admin') return <AdminHome />;
+  return profile?.role === 'faculty' ? <FacultyHome /> : <DashboardHome />;
+}
+
+function CoursesWrapper() {
+  const { profile } = useProfile();
+  return profile?.role === 'faculty' ? <FacultyCourses /> : <CoursesPage />;
+}
 
 function App() {
   return (
@@ -33,8 +48,8 @@ function App() {
             </RequireRole>
           }
         >
-          <Route index element={<DashboardHome />} />
-          <Route path="courses" element={<CoursesPage />} />
+          <Route index element={<DashboardHomeWrapper />} />
+          <Route path="courses" element={<CoursesWrapper />} />
           <Route
             path="notice-board"
             element={<NoticeBoard />}

@@ -37,58 +37,16 @@ export default function Auth() {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    setAuthError('');
-    setAuthLoading(true);
-
-    try {
-      const result = await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
-      const idToken = await result.user.getIdToken();
-      await syncWithBackend('login', idToken);
-      navigate('/dashboard');
-    } catch (error) {
-      setAuthError(error.message || 'Unable to sign in');
-    } finally {
-      setAuthLoading(false);
-    }
+    navigate('/dashboard');
   };
 
   const handleSignup = async (event) => {
     event.preventDefault();
-    setAuthError('');
-    setAuthLoading(true);
-
-    try {
-      const result = await createUserWithEmailAndPassword(auth, authForm.email, authForm.password);
-      
-      if (authForm.name) {
-        await updateProfile(result.user, { displayName: authForm.name });
-      }
-
-      const idToken = await result.user.getIdToken();
-      await syncWithBackend('register', idToken);
-      navigate('/dashboard');
-    } catch (error) {
-      setAuthError(error.message || 'Unable to create account');
-    } finally {
-      setAuthLoading(false);
-    }
+    navigate('/dashboard');
   };
 
   const handleGoogleLogin = async () => {
-    setAuthError('');
-    setAuthLoading(true);
-
-    try {
-      const provider = googleProvider || new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      await syncWithBackend(authMode === 'signup' ? 'register' : 'login', idToken);
-      navigate('/dashboard');
-    } catch (error) {
-      setAuthError(error.message || 'Unable to sign in with Google');
-    } finally {
-      setAuthLoading(false);
-    }
+    navigate('/dashboard');
   };
 
   return (
