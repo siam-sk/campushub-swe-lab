@@ -1,3 +1,5 @@
+import { useState, useMemo } from 'react';
+
 const courses = [
   {
     id: 'cse-3411',
@@ -58,6 +60,21 @@ const accentClassMap = {
 };
 
 export default function CoursesPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredCourses = useMemo(() => {
+    let result = courses;
+    if (searchQuery.trim() !== '') {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(course => 
+        course.title.toLowerCase().includes(lowerQuery) ||
+        course.code.toLowerCase().includes(lowerQuery) ||
+        course.dept.toLowerCase().includes(lowerQuery)
+      );
+    }
+    return result;
+  }, [searchQuery]);
+
   return (
     <div className="dashboard-view courses-view">
       <section className="courses-hero">
@@ -65,7 +82,12 @@ export default function CoursesPage() {
         <div className="courses-toolbar">
           <div className="courses-search">
             <span aria-hidden="true">🔍</span>
-            <input type="search" placeholder="Search course ...." />
+            <input 
+              type="search" 
+              placeholder="Search course ...." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
           <button type="button" className="courses-filter">
             Filter ....
@@ -78,7 +100,7 @@ export default function CoursesPage() {
       </section>
 
       <section className="courses-grid">
-        {courses.map((course) => (
+        {filteredCourses.map((course) => (
           <article
             key={course.id}
             className={`course-card-large ${accentClassMap[course.accent] || ''}`}

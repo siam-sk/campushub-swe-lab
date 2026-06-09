@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 const fallbackAlumni = [];
 
 export default function AlumniPage() {
   const [alumni, setAlumni] = useState(fallbackAlumni);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('');
 
   const getInitials = (name = '') =>
     name
@@ -47,6 +49,26 @@ export default function AlumniPage() {
     });
   };
 
+  const filteredAlumni = useMemo(() => {
+    let result = alumni;
+    
+    // As an example, if you actually had these properties you could filter by them
+    if (activeFilter === 'Available for Mentoring') {
+      // result = result.filter(profile => profile.isMentor);
+    }
+    
+    if (searchQuery.trim() !== '') {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(profile => 
+        (profile.name && profile.name.toLowerCase().includes(lowerQuery)) ||
+        (profile.company && profile.company.toLowerCase().includes(lowerQuery)) ||
+        (profile.role && profile.role.toLowerCase().includes(lowerQuery))
+      );
+    }
+    
+    return result;
+  }, [alumni, searchQuery, activeFilter]);
+
   return (
     <div className="dashboard-view alumni-view">
       <section className="alumni-hero">
@@ -75,18 +97,23 @@ export default function AlumniPage() {
       </section>
 
       <section className="alumni-search">
-        <input type="search" placeholder="Search by name, company, or role..." />
+        <input 
+          type="search" 
+          placeholder="Search by name, company, or role..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <button type="button">Advanced Filter</button>
         <div className="alumni-filters">
           {['Available for Mentoring', 'Recent Graduates', 'Top Achievers'].map((item) => (
-            <button key={item} type="button">{item}</button>
+            <button key={item} type="button" className={item === activeFilter ? 'active' : ''} onClick={() => setActiveFilter(activeFilter === item ? '' : item)}>{item}</button>
           ))}
         </div>
       </section>
 
       <section className="alumni-grid">
-        {alumni.length ? (
-          alumni.map((profile) => (
+        {filteredAlumni.length ? (
+          filteredAlumni.map((profile) => (
             <article key={profile._id || profile.name} className="alumni-card">
               <div className="alumni-cover"></div>
               <div className="alumni-body">

@@ -5,6 +5,7 @@ const fallbackJobs = [];
 export default function JobBoardPage() {
   const [jobs, setJobs] = useState(fallbackJobs);
   const [activeFilter, setActiveFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -28,11 +29,20 @@ export default function JobBoardPage() {
   }, []);
 
   const filteredJobs = useMemo(() => {
-    if (activeFilter === 'All') {
-      return jobs;
+    let result = jobs;
+    if (activeFilter !== 'All') {
+      result = result.filter((job) => job.type === activeFilter);
     }
-    return jobs.filter((job) => job.type === activeFilter);
-  }, [jobs, activeFilter]);
+    if (searchQuery.trim() !== '') {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(job => 
+        job.title.toLowerCase().includes(lowerQuery) ||
+        job.company.toLowerCase().includes(lowerQuery) ||
+        (job.tags && job.tags.some(tag => tag.toLowerCase().includes(lowerQuery)))
+      );
+    }
+    return result;
+  }, [jobs, activeFilter, searchQuery]);
 
   const handleApply = async (jobId) => {
     if (!jobId) {
@@ -59,7 +69,12 @@ export default function JobBoardPage() {
 
       <section className="job-search">
         <div className="job-search-row">
-          <input type="search" placeholder="Search jobs by title, company, or skills..." />
+          <input 
+            type="search" 
+            placeholder="Search jobs by title, company, or skills..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           <button type="button">Advanced Filter</button>
         </div>
         <div className="job-filters">
@@ -116,7 +131,7 @@ export default function JobBoardPage() {
                 </div>
               </div>
               <div className="job-actions">
-                <button type="button" className="secondary-pill">View Details</button>
+                <button type="button" className="secondary-pill" onClick={() => alert(`Details for ${job.title}\nCompany: ${job.company}\nDescription: ${job.description}`)}>View Details</button>
                 <button type="button" className="primary-pill" onClick={() => handleApply(job._id)}>
                   Apply Now
                 </button>

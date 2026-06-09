@@ -1,3 +1,5 @@
+import { useState, useMemo } from 'react';
+
 const conversations = [
   {
     id: 'sarah',
@@ -99,16 +101,33 @@ const messages = [
 ];
 
 export default function Messages() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredConversations = useMemo(() => {
+    if (searchQuery.trim() === '') return conversations;
+    const lowerQuery = searchQuery.toLowerCase();
+    return conversations.filter(c => 
+      c.name.toLowerCase().includes(lowerQuery) ||
+      c.preview.toLowerCase().includes(lowerQuery) ||
+      c.role.toLowerCase().includes(lowerQuery)
+    );
+  }, [searchQuery]);
+
   return (
     <div className="dashboard-view messages-view">
       <aside className="messages-sidebar">
         <h1>Messages</h1>
         <div className="messages-search">
           <span aria-hidden="true">🔍</span>
-          <input type="search" placeholder="Search conversations..." />
+          <input 
+            type="search" 
+            placeholder="Search conversations..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <div className="messages-list">
-          {conversations.map((conversation) => (
+          {filteredConversations.map((conversation) => (
             <button
               key={conversation.id}
               type="button"

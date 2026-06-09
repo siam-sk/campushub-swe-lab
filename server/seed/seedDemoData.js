@@ -403,7 +403,11 @@ const upsertMany = async (model, items, keyFields) => {
 };
 
 const run = async () => {
-  await connectMongo();
+  const conn = await connectMongo();
+  if (!conn.connected) {
+    console.log('Skipping seed:', conn.reason);
+    process.exit(0);
+  }
 
   await upsertMany(Club, clubs, ['name']);
   await upsertMany(Job, jobs, ['title', 'company']);

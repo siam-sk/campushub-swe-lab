@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 const fallbackScholarships = [];
 
 export default function ScholarshipsPage() {
   const [scholarships, setScholarships] = useState(fallbackScholarships);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -38,6 +40,25 @@ export default function ScholarshipsPage() {
     });
   };
 
+  const filteredScholarships = useMemo(() => {
+    let result = scholarships;
+    
+    if (activeFilter !== 'All') {
+      result = result.filter(item => item.categories && item.categories.includes(activeFilter));
+    }
+    
+    if (searchQuery.trim() !== '') {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(item => 
+        (item.title && item.title.toLowerCase().includes(lowerQuery)) ||
+        (item.provider && item.provider.toLowerCase().includes(lowerQuery)) ||
+        (item.description && item.description.toLowerCase().includes(lowerQuery))
+      );
+    }
+    
+    return result;
+  }, [scholarships, searchQuery, activeFilter]);
+
   return (
     <div className="dashboard-view scholarships-view">
       <section className="scholarships-hero">
@@ -67,18 +88,23 @@ export default function ScholarshipsPage() {
       </section>
 
       <section className="scholarships-search">
-        <input type="search" placeholder="Search scholarships by name, provider, or keyword..." />
+        <input 
+          type="search" 
+          placeholder="Search scholarships by name, provider, or keyword..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <button type="button">Advanced Filter</button>
         <div className="scholarships-filters">
           {['All', 'Technology', 'Research', 'Education', 'Diversity', 'Exchange'].map((item) => (
-            <button key={item} type="button">{item}</button>
+            <button key={item} type="button" className={item === activeFilter ? 'active' : ''} onClick={() => setActiveFilter(item)}>{item}</button>
           ))}
         </div>
       </section>
 
       <section className="scholarships-list">
-        {scholarships.length ? (
-          scholarships.map((item) => (
+        {filteredScholarships.length ? (
+          filteredScholarships.map((item) => (
             <article key={item._id || item.title} className="scholarship-card">
               <div className="scholarship-header">
                 <div>
@@ -111,8 +137,8 @@ export default function ScholarshipsPage() {
                 <button type="button" className="primary-pill" onClick={() => handleApply(item._id)}>
                   Apply Now
                 </button>
-                <button type="button" className="secondary-pill">More Details</button>
-                <button type="button" className="secondary-pill">Save for Later</button>
+                <button type="button" className="secondary-pill" onClick={() => alert(`Details for ${item.title}\nProvider: ${item.provider}\nDescription: ${item.description}\nEligibility: ${item.eligibility}`)}>More Details</button>
+                <button type="button" className="secondary-pill" onClick={() => alert(`${item.title} saved for later!`)}>Save for Later</button>
               </div>
             </article>
           ))

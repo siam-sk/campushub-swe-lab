@@ -82,7 +82,11 @@ const upsertMany = async (model, items, keyFields) => {
 
 const run = async () => {
   try {
-    await connectMongo();
+    const conn = await connectMongo();
+    if (!conn.connected) {
+      console.log('Skipping seed:', conn.reason);
+      process.exit(0);
+    }
     await upsertMany(FacultyUser, facultyUsersSeed, ['uid']);
     console.log('Faculty users seed data populated successfully.');
     process.exit(0);

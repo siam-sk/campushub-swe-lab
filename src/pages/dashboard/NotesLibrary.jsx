@@ -1,3 +1,5 @@
+import { useState, useMemo } from 'react';
+
 const categories = [
   { name: 'All Subjects', count: 245, color: 'orange' },
   { name: 'Data Structures', count: 56, color: 'blue' },
@@ -67,6 +69,19 @@ const accentClassMap = {
 };
 
 export default function NotesLibrary() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredNotes = useMemo(() => {
+    if (searchQuery.trim() === '') return notes;
+    const lowerQuery = searchQuery.toLowerCase();
+    return notes.filter(n => 
+      n.title.toLowerCase().includes(lowerQuery) ||
+      n.code.toLowerCase().includes(lowerQuery) ||
+      n.topic.toLowerCase().includes(lowerQuery) ||
+      n.author.toLowerCase().includes(lowerQuery)
+    );
+  }, [searchQuery]);
+
   return (
     <div className="dashboard-view notes-library-view">
       <section className="notes-header">
@@ -80,7 +95,12 @@ export default function NotesLibrary() {
       <section className="notes-search-row">
         <div className="notes-search">
           <span aria-hidden="true">🔍</span>
-          <input type="search" placeholder="Search by subject, topic, or keyword..." />
+          <input 
+            type="search" 
+            placeholder="Search by subject, topic, or keyword..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <button type="button" className="notes-filter">Advanced Filter</button>
       </section>
@@ -113,12 +133,12 @@ export default function NotesLibrary() {
 
         <div className="notes-grid">
           <div className="notes-grid-header">
-            <span>Showing 6 notes</span>
+            <span>Showing {filteredNotes.length} notes</span>
             <div className="notes-grid-pill">Popular</div>
           </div>
 
           <div className="notes-cards">
-            {notes.map((note) => (
+            {filteredNotes.map((note) => (
               <article key={note.id} className={`note-card ${accentClassMap[note.accent] || ''}`}>
                 <div className="note-card-head">
                   <div className="note-folder">
