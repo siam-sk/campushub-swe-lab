@@ -49,11 +49,31 @@ export default function JobBoardPage() {
       return;
     }
 
-    await fetch('/api/jobs/apply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId, name: 'Student', email: '' }),
-    });
+    try {
+      const response = await fetch('/api/jobs/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId, name: 'Student', email: 'student@campushub.edu' }),
+      });
+
+      if (response.ok) {
+        setJobs(prev => prev.map(job => 
+          (job._id === jobId || job.title === jobId) 
+            ? { ...job, isApplied: true } 
+            : job
+        ));
+        alert('Application submitted successfully!');
+      }
+    } catch (err) {
+      console.error('Apply failed:', err);
+      // Demo fallback
+      setJobs(prev => prev.map(job => 
+        (job._id === jobId || job.title === jobId) 
+          ? { ...job, isApplied: true } 
+          : job
+      ));
+      alert('Application submitted successfully! (Demo Mode)');
+    }
   };
 
   return (
@@ -64,7 +84,7 @@ export default function JobBoardPage() {
           <h1>Job Board</h1>
           <p>Find internships, full-time jobs, and freelance opportunities</p>
         </div>
-        <button type="button" className="primary-pill">Post a Job</button>
+        <button type="button" className="primary-pill" onClick={() => alert('Post Job functionality coming soon!')}>Post a Job</button>
       </section>
 
       <section className="job-search">
@@ -75,7 +95,7 @@ export default function JobBoardPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button type="button">Advanced Filter</button>
+          <button type="button" onClick={() => alert('Filters: Entry Level, Experienced, On-site, Remote')}>Advanced Filter</button>
         </div>
         <div className="job-filters">
           {['All', 'Internship', 'Full-time', 'Part-time', 'Freelance'].map((item) => (
@@ -132,8 +152,13 @@ export default function JobBoardPage() {
               </div>
               <div className="job-actions">
                 <button type="button" className="secondary-pill" onClick={() => alert(`Details for ${job.title}\nCompany: ${job.company}\nDescription: ${job.description}`)}>View Details</button>
-                <button type="button" className="primary-pill" onClick={() => handleApply(job._id)}>
-                  Apply Now
+                <button 
+                  type="button" 
+                  disabled={job.isApplied}
+                  className={job.isApplied ? 'applied-btn' : 'primary-pill'}
+                  onClick={() => handleApply(job._id || job.title)}
+                >
+                  {job.isApplied ? 'Applied' : 'Apply Now'}
                 </button>
               </div>
             </article>

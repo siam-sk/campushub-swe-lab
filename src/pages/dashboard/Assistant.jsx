@@ -53,7 +53,13 @@ export default function AssistantPage() {
 
       <section className="assistant-actions">
         {['Explain Concept', 'Solve Problem', 'Debug Code', 'Calculate'].map((item) => (
-          <button key={item} type="button">{item}</button>
+          <button 
+            key={item} 
+            type="button"
+            onClick={() => setDraft(`Can you help me ${item.toLowerCase()}?`)}
+          >
+            {item}
+          </button>
         ))}
       </section>
 

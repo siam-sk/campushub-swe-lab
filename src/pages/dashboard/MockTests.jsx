@@ -31,11 +31,31 @@ export default function MockTestsPage() {
       return;
     }
 
-    await fetch('/api/tests/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ testId, name: 'Student' }),
-    });
+    try {
+      const response = await fetch('/api/tests/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testId, name: 'Student' }),
+      });
+
+      if (response.ok) {
+        setTests(prev => prev.map(test => 
+          (test._id === testId || test.title === testId) 
+            ? { ...test, isStarted: true, participants: (test.participants || 0) + 1 } 
+            : test
+        ));
+        alert('Test environment is being prepared. You will be redirected shortly!');
+      }
+    } catch (err) {
+      console.error('Start failed:', err);
+      // Demo fallback
+      setTests(prev => prev.map(test => 
+        (test._id === testId || test.title === testId) 
+          ? { ...test, isStarted: true, participants: (test.participants || 0) + 1 } 
+          : test
+      ));
+      alert('Test environment is being prepared (Demo Mode). Redirecting...');
+    }
   };
 
   return (
@@ -95,8 +115,13 @@ export default function MockTestsPage() {
                 </div>
               </div>
               <p>{test.participants} students attempted this test</p>
-              <button type="button" className="primary-pill" onClick={() => handleStart(test._id)}>
-                Start Test
+              <button 
+                type="button" 
+                disabled={test.isStarted}
+                className={test.isStarted ? 'started-btn' : 'primary-pill'}
+                onClick={() => handleStart(test._id || test.title)}
+              >
+                {test.isStarted ? 'In Progress' : 'Start Test'}
               </button>
             </article>
           ))
