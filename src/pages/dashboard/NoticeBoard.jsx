@@ -161,7 +161,7 @@ export default function NoticeBoard() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <button type="button" className="notice-filter-btn" onClick={() => alert('Filter drawer opened. Options: Date Range, Department, Specific Keywords.')}>
+          <button type="button" className="notice-filter-btn">
             Filter
           </button>
         </div>
