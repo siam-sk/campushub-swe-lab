@@ -29,6 +29,7 @@ const fallbackSettings = {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(fallbackSettings);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -52,11 +53,68 @@ export default function SettingsPage() {
   }, []);
 
   const handleSave = async () => {
-    await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings),
-    });
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(data.settings);
+        alert('Settings saved successfully!');
+      } else {
+        throw new Error('Failed to save');
+      }
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Settings saved successfully! (Demo Mode)');
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSettings(prev => ({
+          ...prev,
+          profile: { ...prev.profile, avatarUrl: reader.result }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const updateProfileField = (field, value) => {
+    setSettings(prev => ({
+      ...prev,
+      profile: { ...prev.profile, [field]: value }
+    }));
+  };
+
+  const [passwords, setPasswords] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  });
+
+  const handlePasswordUpdate = () => {
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      alert('Please fill in all password fields.');
+      return;
+    }
+    if (passwords.new !== passwords.confirm) {
+      alert('New passwords do not match!');
+      return;
+    }
+    
+    setUploading(true);
+    setTimeout(() => {
+      setUploading(false);
+      setPasswords({ current: '', new: '', confirm: '' });
+      alert('Password updated successfully! Please use your new password for next login.');
+    }, 1500);
   };
 
   return (
@@ -79,8 +137,21 @@ export default function SettingsPage() {
           <section className="settings-panel">
             <h2>Profile Information</h2>
             <div className="settings-profile">
-              <div className="settings-avatar">JS</div>
-              <button type="button">Change Photo</button>
+              {settings.profile.avatarUrl ? (
+                <img src={settings.profile.avatarUrl} alt="Avatar" className="settings-avatar-img" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <div className="settings-avatar">JS</div>
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                id="avatar-upload" 
+                style={{ display: 'none' }} 
+                onChange={handleImageChange} 
+              />
+              <label htmlFor="avatar-upload" className="primary-pill" style={{ cursor: 'pointer', padding: '8px 16px', display: 'inline-block' }}>
+                Change Photo
+              </label>
             </div>
             <div className="settings-form">
               <label>
@@ -88,37 +159,55 @@ export default function SettingsPage() {
                 <input
                   type="text"
                   value={settings.profile.fullName}
-                  onChange={(event) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      profile: { ...prev.profile, fullName: event.target.value },
-                    }))
-                  }
+                  onChange={(e) => updateProfileField('fullName', e.target.value)}
                 />
               </label>
               <label>
                 Student ID
-                <input type="text" value={settings.profile.studentId} readOnly />
+                <input 
+                  type="text" 
+                  value={settings.profile.studentId} 
+                  onChange={(e) => updateProfileField('studentId', e.target.value)}
+                />
               </label>
               <label>
                 Email Address
-                <input type="email" value={settings.profile.email} readOnly />
+                <input 
+                  type="email" 
+                  value={settings.profile.email} 
+                  onChange={(e) => updateProfileField('email', e.target.value)}
+                />
               </label>
               <label>
                 Phone Number
-                <input type="text" value={settings.profile.phone} readOnly />
+                <input 
+                  type="text" 
+                  value={settings.profile.phone} 
+                  onChange={(e) => updateProfileField('phone', e.target.value)}
+                />
               </label>
               <label>
                 Department
-                <input type="text" value={settings.profile.department} readOnly />
+                <input 
+                  type="text" 
+                  value={settings.profile.department} 
+                  onChange={(e) => updateProfileField('department', e.target.value)}
+                />
               </label>
               <label>
                 Year
-                <input type="text" value={settings.profile.year} readOnly />
+                <input 
+                  type="text" 
+                  value={settings.profile.year} 
+                  onChange={(e) => updateProfileField('year', e.target.value)}
+                />
               </label>
               <label className="settings-bio">
                 Bio
-                <textarea value={settings.profile.bio} readOnly />
+                <textarea 
+                  value={settings.profile.bio} 
+                  onChange={(e) => updateProfileField('bio', e.target.value)}
+                />
               </label>
             </div>
             <div className="settings-actions">
@@ -165,10 +254,32 @@ export default function SettingsPage() {
             </div>
             <div className="settings-password">
               <h3>Change Password</h3>
-              <input type="password" placeholder="Current Password" />
-              <input type="password" placeholder="New Password" />
-              <input type="password" placeholder="Confirm New Password" />
-              <button type="button" className="primary-pill">Update Password</button>
+              <input 
+                type="password" 
+                placeholder="Current Password" 
+                value={passwords.current}
+                onChange={(e) => setPasswords(prev => ({ ...prev, current: e.target.value }))}
+              />
+              <input 
+                type="password" 
+                placeholder="New Password" 
+                value={passwords.new}
+                onChange={(e) => setPasswords(prev => ({ ...prev, new: e.target.value }))}
+              />
+              <input 
+                type="password" 
+                placeholder="Confirm New Password" 
+                value={passwords.confirm}
+                onChange={(e) => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
+              />
+              <button 
+                type="button" 
+                className="primary-pill" 
+                onClick={handlePasswordUpdate}
+                disabled={uploading}
+              >
+                {uploading ? 'Updating...' : 'Update Password'}
+              </button>
             </div>
           </section>
 

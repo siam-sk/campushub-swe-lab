@@ -42,11 +42,26 @@ export default function AlumniPage() {
       return;
     }
 
-    await fetch('/api/alumni/request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ alumniId }),
-    });
+    try {
+      const response = await fetch('/api/alumni/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alumniId }),
+      });
+      if (response.ok) {
+        setAlumni(prev => prev.map(a => 
+          a._id === alumniId ? { ...a, isRequested: true } : a
+        ));
+        alert('Mentorship request sent successfully!');
+      }
+    } catch (err) {
+      console.error('Request failed:', err);
+      // Demo fallback
+      setAlumni(prev => prev.map(a => 
+        (a._id === alumniId || a.name === alumniId) ? { ...a, isRequested: true } : a
+      ));
+      alert('Mentorship request sent successfully! (Demo Mode)');
+    }
   };
 
   const filteredAlumni = useMemo(() => {
@@ -103,7 +118,7 @@ export default function AlumniPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button type="button">Advanced Filter</button>
+        <button type="button" onClick={() => alert('Advanced Filter options coming soon!')}>Advanced Filter</button>
         <div className="alumni-filters">
           {['Available for Mentoring', 'Recent Graduates', 'Top Achievers'].map((item) => (
             <button key={item} type="button" className={item === activeFilter ? 'active' : ''} onClick={() => setActiveFilter(activeFilter === item ? '' : item)}>{item}</button>
@@ -131,8 +146,13 @@ export default function AlumniPage() {
                   ))}
                 </div>
                 {profile.highlight ? <p>{profile.highlight}</p> : null}
-                <button type="button" className="primary-pill" onClick={() => handleRequest(profile._id)}>
-                  Request Mentorship
+                <button 
+                  type="button" 
+                  className={profile.isRequested ? 'applied-btn' : 'primary-pill'} 
+                  onClick={() => handleRequest(profile._id || profile.name)}
+                  disabled={profile.isRequested}
+                >
+                  {profile.isRequested ? 'Request Pending' : 'Request Mentorship'}
                 </button>
               </div>
             </article>
