@@ -194,13 +194,13 @@ export default function DashboardHome() {
             </div>
 
             <div className="quick-actions">
-              <button type="button" className="quick-action primary" onClick={() => window.location.href='/dashboard/notes-library'}>
+              <button type="button" className="quick-action primary">
                 Upload Notes
               </button>
-              <button type="button" className="quick-action" onClick={() => alert('Viewing Timetable...')}>
+              <button type="button" className="quick-action">
                 View Timetable
               </button>
-              <button type="button" className="quick-action" onClick={() => window.location.href='/dashboard/club'}>
+              <button type="button" className="quick-action">
                 Join Study Group
               </button>
             </div>
