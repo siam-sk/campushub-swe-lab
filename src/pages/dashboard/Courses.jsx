@@ -1,67 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { auth } from '../../firebase';
 
-const courses = [
-  {
-    id: 'cse-3411',
-    title: 'Data Structures & Algorithms',
-    code: 'CSE 3411',
-    dept: 'Dept. of CSE',
-    footer: 'Fall 25 CSE 3411/CSI 311 (H): Data Structures & Algo',
-    accent: 'orange',
-    materials: 12,
-    assignments: 3
-  },
-  {
-    id: 'cse-2123',
-    title: 'Fall 25 CSE 123/EEE 2123 (E): Electronics',
-    code: 'CSE 2123',
-    dept: 'Dept. of CSE',
-    footer: 'Fall 25 CSE 123/EEE 2123 (E): Electronics',
-    accent: 'blue',
-    materials: 8,
-    assignments: 1
-  },
-  {
-    id: 'cse-3412',
-    title: 'Fall 25 CSE 3412/CSI 312 (A): System Analysis',
-    code: 'CSE 3412',
-    dept: 'Dept. of CSE',
-    footer: 'Fall 25 CSE 3412/CSI 312 (A): System Analysis',
-    accent: 'sunset',
-    materials: 5,
-    assignments: 2
-  },
-  {
-    id: 'cse-4165',
-    title: 'Fall 25 CSE 4165/CSE 465 (K): Web Programming',
-    code: 'CSE 4165',
-    dept: 'Dept. of CSE',
-    footer: 'Fall 25 CSE 4165/CSE 465 (K): Web Programming',
-    accent: 'amber',
-    materials: 15,
-    assignments: 4
-  },
-  {
-    id: 'math-2205',
-    title: 'Fall 25 MATH 2205/STAT 205 (D): Probability',
-    code: 'CSE 2205',
-    dept: 'Dept. of CSE',
-    footer: 'Fall 25 MATH 2205/STAT 205 (D): Probability',
-    accent: 'gold',
-    materials: 6,
-    assignments: 1
-  },
-  {
-    id: 'cse-3412-lab',
-    title: 'Data Structures & Algorithms Lab',
-    code: 'CSE 3412',
-    dept: 'Dept. of CSE',
-    footer: 'Fall 25 CSE 3412/CSI 312 (Lab): DS&A Lab',
-    accent: 'gold',
-    materials: 4,
-    assignments: 5
-  },
-];
 
 const accentClassMap = {
   orange: 'course-accent-orange',
@@ -72,8 +11,78 @@ const accentClassMap = {
 };
 
 export default function CoursesPage() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCourse, setActiveCourse] = useState(null);
+
+  const [courseAssignments, setCourseAssignments] = useState([]);
+  const [submittingAssignmentId, setSubmittingAssignmentId] = useState(null);
+  const [submissionText, setSubmissionText] = useState('');
+
+  const getToken = async () => {
+    const mockToken = localStorage.getItem('campushub_mock_token');
+    if (mockToken) return mockToken;
+    if (auth.currentUser) {
+      return await auth.currentUser.getIdToken();
+    }
+    return null;
+  };
+
+  const loadCourses = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const token = await getToken();
+      const response = await fetch('/api/courses', {
+        headers: {
+          Authorization: `Bearer ${token || ''}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load courses');
+      }
+
+      const data = await response.json();
+      setCourses(data.courses || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAssignments = async (courseId) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/assignments?courseId=${courseId}`, {
+        headers: {
+          Authorization: `Bearer ${token || ''}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to load assignments');
+      }
+      const data = await response.json();
+      setCourseAssignments(data.assignments || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) {
+        loadCourses();
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredCourses = useMemo(() => {
     let result = courses;
@@ -86,23 +95,92 @@ export default function CoursesPage() {
       );
     }
     return result;
-  }, [searchQuery]);
+  }, [courses, searchQuery]);
 
-  const handleCourseClick = (course) => {
-    setActiveCourse(course);
+  const handleCourseClick = async (course) => {
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/courses?id=${course.id}`, {
+        headers: {
+          Authorization: `Bearer ${token || ''}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to load course details');
+      }
+      const data = await response.json();
+      setActiveCourse(data);
+      await loadAssignments(course.id);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeCourseView = () => {
     setActiveCourse(null);
+    setCourseAssignments([]);
+    setSubmittingAssignmentId(null);
+    setSubmissionText('');
   };
 
   const handleDownloadMaterial = () => {
     alert('Downloading course materials...');
   };
 
-  const handleSubmitAssignment = () => {
-    alert('Assignment submission portal opened.');
+  const handleAssignmentSubmit = async (assignmentId) => {
+    if (!submissionText.trim()) {
+      alert('Submission text cannot be empty');
+      return;
+    }
+    try {
+      const token = await getToken();
+      const response = await fetch('/api/assignments/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token || ''}`,
+        },
+        body: JSON.stringify({
+          assignmentId,
+          submissionText,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit assignment');
+      }
+
+      alert('Assignment submitted successfully!');
+      setSubmittingAssignmentId(null);
+      setSubmissionText('');
+      if (activeCourse) {
+        await loadAssignments(activeCourse.id);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
   };
+
+  if (loading && !activeCourse) {
+    return (
+      <div className="dashboard-loading" style={{ padding: '40px 0', textAlign: 'center' }}>
+        <div className="loading-spinner"></div>
+        <span>Loading courses...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-state" style={{ padding: '40px 0', textAlign: 'center', color: '#d92d20' }}>
+        {error}
+      </div>
+    );
+  }
 
   if (activeCourse) {
     return (
@@ -121,18 +199,152 @@ export default function CoursesPage() {
             </div>
           </div>
           <span className="course-dept">{activeCourse.dept}</span>
+          {activeCourse.progress !== undefined && (
+            <div style={{ marginTop: '16px' }}>
+              <span style={{ fontSize: '13px', color: '#ffffff', opacity: 0.9 }}>Course Progress: {activeCourse.progress}%</span>
+              <div style={{ width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.3)', borderRadius: '4px', height: '6px', marginTop: '6px', overflow: 'hidden' }}>
+                <div style={{ width: `${activeCourse.progress}%`, backgroundColor: '#ffffff', height: '100%' }} />
+              </div>
+            </div>
+          )}
         </div>
         
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h3>Course Materials ({activeCourse.materials})</h3>
-            <p>Syllabus, lecture slides, and reading materials.</p>
-            <button type="button" className="primary-pill" onClick={handleDownloadMaterial} style={{ marginTop: '10px' }}>View Materials</button>
+        <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+          <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700', color: '#101828' }}>
+              Assignments ({courseAssignments.length})
+            </h3>
+            
+            {courseAssignments.length ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {courseAssignments.map((assignment) => (
+                  <div key={assignment.id} style={{ border: '1px solid #eaecf0', padding: '16px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#344054' }}>{assignment.title}</h4>
+                        <span style={{ fontSize: '12px', color: '#667085' }}>
+                          Due: {new Date(assignment.deadline).toLocaleString()}
+                        </span>
+                      </div>
+                      
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        backgroundColor: assignment.status === 'Submitted' ? '#ecfdf3' : '#fffaeb',
+                        color: assignment.status === 'Submitted' ? '#027a48' : '#b54708',
+                        border: `1px solid ${assignment.status === 'Submitted' ? '#abfcd3' : '#fec84b'}`,
+                      }}>
+                        {assignment.status}
+                      </span>
+                    </div>
+                    
+                    <p style={{ margin: 0, fontSize: '14px', color: '#475467' }}>{assignment.description}</p>
+                    
+                    {assignment.status === 'Submitted' && (
+                      <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '6px', borderLeft: '3px solid #12b76a', marginTop: '4px' }}>
+                        <strong style={{ fontSize: '12px', color: '#344054', display: 'block', marginBottom: '4px' }}>Your Submission:</strong>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#475467', whiteSpace: 'pre-wrap' }}>{assignment.submissionText}</p>
+                        <span style={{ fontSize: '11px', color: '#667085', display: 'block', marginTop: '6px' }}>
+                          Submitted on: {new Date(assignment.submittedAt).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {assignment.status === 'Pending' && submittingAssignmentId !== assignment.id && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSubmittingAssignmentId(assignment.id);
+                          setSubmissionText('');
+                        }}
+                        style={{
+                          alignSelf: 'flex-start',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          backgroundColor: '#ff7a00',
+                          border: 'none',
+                          color: '#fff',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          marginTop: '6px'
+                        }}
+                      >
+                        Submit Answer
+                      </button>
+                    )}
+                    
+                    {submittingAssignmentId === assignment.id && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#344054' }}>
+                          Enter submission text:
+                          <textarea
+                            rows="4"
+                            value={submissionText}
+                            onChange={(e) => setSubmissionText(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '10px',
+                              borderRadius: '6px',
+                              border: '1px solid #d0d5dd',
+                              fontSize: '14px',
+                              outline: 'none',
+                              marginTop: '6px',
+                              boxSizing: 'border-box'
+                            }}
+                            placeholder="Type your submission here..."
+                          />
+                        </label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleAssignmentSubmit(assignment.id)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              backgroundColor: '#ff7a00',
+                              border: 'none',
+                              color: '#fff',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Submit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSubmittingAssignmentId(null)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              backgroundColor: '#fff',
+                              border: '1px solid #d0d5dd',
+                              color: '#344054',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ margin: 0, color: '#667085', fontSize: '14px' }}>No assignments posted for this course.</p>
+            )}
           </div>
-          <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h3>Assignments ({activeCourse.assignments})</h3>
-            <p>Pending tasks, lab reports, and project submissions.</p>
-            <button type="button" className="secondary-pill" onClick={handleSubmitAssignment} style={{ marginTop: '10px' }}>Submit Assignment</button>
+          
+          <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '700', color: '#101828' }}>Course Materials</h3>
+            <p style={{ margin: '0 0 16px 0', color: '#475467', fontSize: '14px' }}>Access syllabus, lecture slides, and reading materials.</p>
+            <button type="button" className="primary-pill" onClick={handleDownloadMaterial}>View Materials</button>
           </div>
         </div>
       </div>
@@ -164,29 +376,35 @@ export default function CoursesPage() {
       </section>
 
       <section className="courses-grid">
-        {filteredCourses.map((course) => (
-          <article
-            key={course.id}
-            className={`course-card-large ${accentClassMap[course.accent] || ''}`}
-            onClick={() => handleCourseClick(course)}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="course-card-top">
-              <div className="course-card-title">
-                <span className="course-icon">📁</span>
-                <div>
-                  <strong>{course.title}</strong>
-                  <span>{course.code}</span>
+        {filteredCourses.length ? (
+          filteredCourses.map((course) => (
+            <article
+              key={course.id}
+              className={`course-card-large ${accentClassMap[course.accent] || ''}`}
+              onClick={() => handleCourseClick(course)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="course-card-top">
+                <div className="course-card-title">
+                  <span className="course-icon">📁</span>
+                  <div>
+                    <strong>{course.title}</strong>
+                    <span>{course.code}</span>
+                  </div>
                 </div>
+                <button type="button" className="course-options" aria-label="Course options" onClick={(e) => { e.stopPropagation(); alert(`Options for ${course.title}`); }}>
+                  ⋮
+                </button>
               </div>
-              <button type="button" className="course-options" aria-label="Course options" onClick={(e) => { e.stopPropagation(); alert(`Options for ${course.title}`); }}>
-                ⋮
-              </button>
-            </div>
-            <span className="course-dept">{course.dept}</span>
-            <div className="course-footer-pill">{course.footer}</div>
-          </article>
-        ))}
+              <span className="course-dept">{course.dept}</span>
+              <div className="course-footer-pill">{course.footer}</div>
+            </article>
+          ))
+        ) : (
+          <div className="empty-state" style={{ gridColumn: '1 / -1', padding: '60px 0', textAlign: 'center', color: '#667085' }}>
+            No courses enrolled.
+          </div>
+        )}
       </section>
     </div>
   );

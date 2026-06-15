@@ -14,7 +14,7 @@ export const requireAuth = async (req, res, next) => {
 
   try {
     let decoded;
-    if (token.startsWith('mock-')) {
+    if (process.env.NODE_ENV !== 'production' && token.startsWith('mock-')) {
       const email = token.replace('mock-', '');
       decoded = {
         uid: `mock-uid-${email}`,
@@ -23,6 +23,9 @@ export const requireAuth = async (req, res, next) => {
         picture: ''
       };
     } else {
+      if (token.startsWith('mock-')) {
+        return res.status(401).json({ message: 'Mock tokens are not allowed in production' });
+      }
       decoded = await admin.auth().verifyIdToken(token);
     }
     req.user = decoded;

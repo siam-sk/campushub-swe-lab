@@ -1,17 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  updateProfile,
-} from 'firebase/auth';
-import { auth, googleProvider } from '../firebase';
+import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 export default function Auth() {
-  const location = useLocation();
-  const [authMode, setAuthMode] = useState(location.state?.mode || 'login');
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '', remember: false });
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -35,20 +27,39 @@ export default function Auth() {
     setAuthForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const resolveId = async (id) => {
+    const trimmedId = id.trim();
+    if (!trimmedId) {
+      throw new Error('ID or Email is required');
+    }
+    const response = await fetch(`/api/auth/resolve-id?id=${encodeURIComponent(trimmedId)}`);
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.message || 'Failed to resolve user ID');
+    }
+    const data = await response.json();
+    return data.email;
+  };
+
   const handleLogin = async (event) => {
     event.preventDefault();
     setAuthError('');
     setAuthLoading(true);
 
     try {
+      const resolvedEmail = await resolveId(authForm.email);
+
       let idToken;
       // Start Mock Auth Bypass
-      if (authForm.email.includes('@campushub.edu')) {
-        idToken = `mock-${authForm.email}`;
+      if (resolvedEmail.includes('@campushub.edu')) {
+        if (authForm.password !== '123456') {
+          throw new Error('Invalid ID or Password');
+        }
+        idToken = `mock-${resolvedEmail}`;
         localStorage.setItem('campushub_mock_token', idToken);
       } else {
         // Real Login Fallback
-        const result = await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
+        const result = await signInWithEmailAndPassword(auth, resolvedEmail, authForm.password);
         idToken = await result.user.getIdToken();
         localStorage.removeItem('campushub_mock_token');
       }
@@ -57,53 +68,6 @@ export default function Auth() {
       navigate('/dashboard');
     } catch (error) {
       setAuthError(error.message || 'Unable to sign in');
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleSignup = async (event) => {
-    event.preventDefault();
-    setAuthError('');
-    setAuthLoading(true);
-
-    try {
-      let idToken;
-      // Start Mock Auth Bypass
-      if (authForm.email.includes('@campushub.edu')) {
-        idToken = `mock-${authForm.email}`;
-        localStorage.setItem('campushub_mock_token', idToken);
-      } else {
-        // Real Signup Fallback
-        const result = await createUserWithEmailAndPassword(auth, authForm.email, authForm.password);
-        if (authForm.name) {
-          await updateProfile(result.user, { displayName: authForm.name });
-        }
-        idToken = await result.user.getIdToken();
-        localStorage.removeItem('campushub_mock_token');
-      }
-
-      await syncWithBackend('register', idToken);
-      navigate('/dashboard');
-    } catch (error) {
-      setAuthError(error.message || 'Unable to create account');
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setAuthError('');
-    setAuthLoading(true);
-
-    try {
-      const provider = googleProvider || new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      await syncWithBackend(authMode === 'signup' ? 'register' : 'login', idToken);
-      navigate('/dashboard');
-    } catch (error) {
-      setAuthError(error.message || 'Unable to sign in with Google');
     } finally {
       setAuthLoading(false);
     }
@@ -141,46 +105,16 @@ export default function Auth() {
 
       <section className="auth-card">
         <div className="auth-header">
-          <h2>{authMode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
-          <p>
-            {authMode === 'login'
-              ? 'Sign in to continue to your account'
-              : 'Join the community of learners'}
-          </p>
+          <h2>Welcome Back</h2>
+          <p>Sign in to continue to your account</p>
         </div>
 
-        <button
-          type="button"
-          className="btn btn-outline auth-submit"
-          onClick={handleGoogleLogin}
-          disabled={authLoading}
-        >
-          {authLoading ? 'Connecting...' : 'Continue with Google'}
-        </button>
-
-        <div className="auth-divider">
-          <span>OR</span>
-        </div>
-
-        <form onSubmit={authMode === 'login' ? handleLogin : handleSignup}>
-          {authMode === 'signup' ? (
-            <label className="auth-field">
-              <span>Full Name</span>
-              <input
-                type="text"
-                placeholder="Enter your full name"
-                value={authForm.name}
-                onChange={handleAuthChange('name')}
-                required
-              />
-            </label>
-          ) : null}
-
+        <form onSubmit={handleLogin}>
           <label className="auth-field">
-            <span>Email Address</span>
+            <span>Student / Faculty / Admin ID</span>
             <input
-              type="email"
-              placeholder="your.email@university.edu"
+              type="text"
+              placeholder="Enter your ID or Email"
               value={authForm.email}
               onChange={handleAuthChange('email')}
               required
@@ -198,55 +132,28 @@ export default function Auth() {
             />
           </label>
 
-          {authMode === 'login' ? (
-            <div className="auth-meta">
-              <label className="auth-checkbox">
-                <input
-                  type="checkbox"
-                  checked={authForm.remember}
-                  onChange={handleAuthChange('remember')}
-                />
-                Remember me
-              </label>
-              <button type="button" className="link-button">
-                Forgot password?
-              </button>
-            </div>
-          ) : null}
+          <div className="auth-meta">
+            <label className="auth-checkbox">
+              <input
+                type="checkbox"
+                checked={authForm.remember}
+                onChange={handleAuthChange('remember')}
+              />
+              Remember me
+            </label>
+            <button type="button" className="link-button">
+              Forgot password?
+            </button>
+          </div>
 
           {authError ? <p className="auth-error">{authError}</p> : null}
 
           <button className="btn btn-primary auth-submit" type="submit" disabled={authLoading}>
-            {authLoading
-              ? 'Please wait...'
-              : authMode === 'login'
-                ? 'Sign In'
-                : 'Create Account'}
+            {authLoading ? 'Please wait...' : 'Sign In'}
           </button>
         </form>
 
         <div className="auth-footer">
-          {authMode === 'login' ? (
-            <p>
-              Don&apos;t have an account?{' '}
-              <button type="button" className="link-button" onClick={() => setAuthMode('signup')}>
-                Sign Up
-              </button>
-            </p>
-          ) : (
-            <p>
-              Already have an account?{' '}
-              <button type="button" className="link-button" onClick={() => setAuthMode('login')}>
-                Sign In
-              </button>
-            </p>
-          )}
-          {authMode === 'signup' ? (
-            <div className="auth-note">
-              Note: CampusHub is designed for academic networking. Please do not share sensitive
-              personal information.
-            </div>
-          ) : null}
           <button type="button" className="link-button" onClick={() => navigate('/')}>
             Back to Home
           </button>

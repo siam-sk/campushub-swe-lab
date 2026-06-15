@@ -9,7 +9,7 @@ const getTokenFromHeader = (req) => {
 };
 
 const decodeToken = async (token) => {
-  if (token.startsWith('mock-')) {
+  if (process.env.NODE_ENV !== 'production' && token.startsWith('mock-')) {
     const email = token.replace('mock-', '');
     return {
       uid: `mock-uid-${email}`,
@@ -17,6 +17,9 @@ const decodeToken = async (token) => {
       name: 'Mock User',
       picture: '',
     };
+  }
+  if (token.startsWith('mock-')) {
+    throw new Error('Mock tokens are not allowed in production');
   }
   return await admin.auth().verifyIdToken(token);
 };
@@ -130,7 +133,7 @@ export default async function handler(req, res) {
         }
         return res.json({
           message: 'Download registered',
-          downloadUrl: updatedNote.downloadUrl || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          downloadUrl: updatedNote.fileUrl || updatedNote.downloadUrl,
           note: updatedNote,
         });
       }
@@ -151,9 +154,9 @@ export default async function handler(req, res) {
       }
 
       // Default POST action: Upload Note
-      const { title, code, topic, category, pages } = req.body || {};
-      if (!title || !code || !topic) {
-        return res.status(400).json({ message: 'Title, code, and topic are required' });
+      const { title, code, topic, category, pages, fileUrl, fileName, fileSize } = req.body || {};
+      if (!title || !code || !topic || !fileUrl || !fileName || !fileSize) {
+        return res.status(400).json({ message: 'Title, code, topic, and file details are required' });
       }
 
       // Determine initial status: faculty/admin are auto-approved, students are pending
@@ -161,7 +164,6 @@ export default async function handler(req, res) {
 
       const selectedCategory = category || 'All Subjects';
       const accent = categoryAccentMap[selectedCategory] || 'blue';
-      const downloadUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
       const newNote = await Note.create({
         title,
@@ -172,7 +174,10 @@ export default async function handler(req, res) {
         author: profile?.fullName || decoded.name || decoded.email || 'Anonymous',
         email: decoded.email,
         accent,
-        downloadUrl,
+        downloadUrl: fileUrl,
+        fileUrl,
+        fileName,
+        fileSize: Number(fileSize),
         status,
         downloads: 0,
       });

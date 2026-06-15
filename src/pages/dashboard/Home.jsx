@@ -1,52 +1,15 @@
 import { useEffect, useState } from 'react';
 import { auth } from '../../firebase';
 
-const fallbackHome = {
-  greetingName: 'Student',
-  greetingMessage: "Here's what's happening with your studies today",
-  stats: [
-    { title: 'My Courses', value: '6', note: '+2 this semester', icon: '📘', accent: 'blue' },
-    { title: 'New Notices', value: '5', note: '3 unread', icon: '🔔', accent: 'orange' },
-    { title: 'Messages', value: '12', note: '3 new', icon: '💬', accent: 'green' },
-    { title: 'GPA', value: '3.75', note: '↑ 0.15', icon: '📈', accent: 'purple' },
-  ],
-  courses: [
-    {
-      name: 'Data Structures & Algorithms',
-      code: 'CSE 201',
-      progress: 75,
-      schedule: 'Today, 2:00 PM',
-      accent: 'blue',
-    },
-    {
-      name: 'Database Management Systems',
-      code: 'CSE 301',
-      progress: 60,
-      schedule: 'Tomorrow, 10:00 AM',
-      accent: 'green',
-    },
-    {
-      name: 'Operating Systems',
-      code: 'CSE 302',
-      progress: 45,
-      schedule: 'Wednesday, 11:00 AM',
-      accent: 'purple',
-    },
-  ],
-  notices: [
-    { title: 'Holiday Notice', time: '2 hours ago', label: 'Holiday' },
-    { title: 'Exam Schedule Updated', time: '5 hours ago', label: 'Exam' },
-    { title: 'Library Timing Change', time: '1 day ago', label: 'General' },
-  ],
-  events: [
-    { title: 'Mid-term Examination', date: 'Jan 15, 2026', type: 'Exam', accent: 'red' },
-    { title: 'Tech Fest 2026', date: 'Jan 20, 2026', type: 'Event', accent: 'orange' },
-    { title: 'Project Submission', date: 'Jan 25, 2026', type: 'Deadline', accent: 'yellow' },
-  ],
-};
-
 export default function DashboardHome() {
-  const [homeData, setHomeData] = useState(fallbackHome);
+  const [homeData, setHomeData] = useState({
+    greetingName: 'Student',
+    greetingMessage: "Here's what's happening with your studies today",
+    stats: [],
+    courses: [],
+    notices: [],
+    events: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,7 +18,6 @@ export default function DashboardHome() {
     const loadHome = async () => {
       try {
         if (!auth.currentUser) {
-          setHomeData(fallbackHome);
           setLoading(false);
           return;
         }
@@ -70,9 +32,11 @@ export default function DashboardHome() {
         }
 
         const payload = await response.json();
-        setHomeData(payload.page || fallbackHome);
-      } catch {
-        setHomeData(fallbackHome);
+        if (payload.page) {
+          setHomeData(payload.page);
+        }
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -99,18 +63,20 @@ export default function DashboardHome() {
         </div>
       ) : null}
 
-      <section className="stats-grid" aria-label="Dashboard summary">
-        {homeData.stats.map((stat) => (
-          <article key={stat.title} className={`stat-card accent-${stat.accent}`}>
-            <div className="stat-icon">{stat.icon}</div>
-            <div>
-              <strong>{stat.value}</strong>
-              <span>{stat.title}</span>
-              <small>{stat.note}</small>
-            </div>
-          </article>
-        ))}
-      </section>
+      {!loading && homeData.stats.length > 0 && (
+        <section className="stats-grid" aria-label="Dashboard summary">
+          {homeData.stats.map((stat) => (
+            <article key={stat.title} className={`stat-card accent-${stat.accent}`}>
+              <div className="stat-icon">{stat.icon}</div>
+              <div>
+                <strong>{stat.value}</strong>
+                <span>{stat.title}</span>
+                <small>{stat.note}</small>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
 
       <section className="dashboard-grid">
         <div className="dashboard-column dashboard-column-main">
@@ -120,27 +86,31 @@ export default function DashboardHome() {
             </div>
 
             <div className="course-list">
-              {homeData.courses.map((course) => (
-                <article key={course.code} className={`course-card accent-${course.accent}`}>
-                  <div className="course-head">
-                    <div>
-                      <h3>{course.name}</h3>
-                      <p>{course.code}</p>
+              {homeData.courses && homeData.courses.length > 0 ? (
+                homeData.courses.map((course) => (
+                  <article key={course.code} className={`course-card accent-${course.accent}`}>
+                    <div className="course-head">
+                      <div>
+                        <h3>{course.name}</h3>
+                        <p>{course.code}</p>
+                      </div>
+                      <span>{course.progress}%</span>
                     </div>
-                    <span>{course.progress}%</span>
-                  </div>
 
-                  <div className="progress-label">
-                    <span>Progress</span>
-                  </div>
+                    <div className="progress-label">
+                      <span>Progress</span>
+                    </div>
 
-                  <div className="progress-track">
-                    <span style={{ width: `${course.progress}%` }} />
-                  </div>
+                    <div className="progress-track">
+                      <span style={{ width: `${course.progress}%` }} />
+                    </div>
 
-                  <div className="course-meta">⏰ {course.schedule}</div>
-                </article>
-              ))}
+                    <div className="course-meta">⏰ {course.schedule}</div>
+                  </article>
+                ))
+              ) : (
+                <p style={{ padding: '16px', color: '#667085' }}>No enrolled courses found.</p>
+              )}
             </div>
           </section>
 
@@ -150,15 +120,19 @@ export default function DashboardHome() {
             </div>
 
             <div className="event-list">
-              {homeData.events.map((event) => (
-                <article key={event.title} className={`event-card accent-${event.accent}`}>
-                  <div>
-                    <h3>{event.title}</h3>
-                    <p>{event.date}</p>
-                  </div>
-                  <span className="event-pill">{event.type}</span>
-                </article>
-              ))}
+              {homeData.events && homeData.events.length > 0 ? (
+                homeData.events.map((event) => (
+                  <article key={event.title} className={`event-card accent-${event.accent}`}>
+                    <div>
+                      <h3>{event.title}</h3>
+                      <p>{event.date}</p>
+                    </div>
+                    <span className="event-pill">{event.type}</span>
+                  </article>
+                ))
+              ) : (
+                <p style={{ padding: '16px', color: '#667085' }}>No upcoming events.</p>
+              )}
             </div>
           </section>
         </div>
@@ -170,17 +144,21 @@ export default function DashboardHome() {
             </div>
 
             <div className="notice-list">
-              {homeData.notices.map((notice) => (
-                <article key={notice.title} className="notice-item">
-                  <div className="notice-mark" />
-                  <div>
-                    <h3>{notice.title}</h3>
-                    <p>
-                      {notice.time} · <span>{notice.label}</span>
-                    </p>
-                  </div>
-                </article>
-              ))}
+              {homeData.notices && homeData.notices.length > 0 ? (
+                homeData.notices.map((notice) => (
+                  <article key={notice.title} className="notice-item">
+                    <div className="notice-mark" />
+                    <div>
+                      <h3>{notice.title}</h3>
+                      <p>
+                        {notice.time} · <span>{notice.label}</span>
+                      </p>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p style={{ padding: '16px', color: '#667085' }}>No new notices.</p>
+              )}
             </div>
 
             <a className="panel-button" href="/dashboard/notice-board">
@@ -197,7 +175,7 @@ export default function DashboardHome() {
               <button type="button" className="quick-action primary" onClick={() => window.location.href='/dashboard/notes-library'}>
                 Upload Notes
               </button>
-              <button type="button" className="quick-action" onClick={() => alert('Viewing Timetable...')}>
+              <button type="button" className="quick-action" onClick={() => window.location.href='/dashboard/courses'}>
                 View Timetable
               </button>
               <button type="button" className="quick-action" onClick={() => window.location.href='/dashboard/club'}>

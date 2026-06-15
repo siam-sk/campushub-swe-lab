@@ -18,6 +18,9 @@ const noteSchema = new mongoose.Schema(
     },
     downloadUrl: { type: String, default: '' },
     accent: { type: String, default: 'blue' },
+    fileUrl: { type: String, required: true },
+    fileName: { type: String, required: true },
+    fileSize: { type: Number, required: true },
   },
   { timestamps: true }
 );

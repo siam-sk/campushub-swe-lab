@@ -1,29 +1,56 @@
 import { useEffect, useState } from 'react';
+import { auth } from '../../firebase';
 
 const fallbackClubs = [];
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState(fallbackClubs);
 
+  const getToken = async () => {
+    const mockToken = localStorage.getItem('campushub_mock_token');
+    if (mockToken) return mockToken;
+    if (auth.currentUser) {
+      return await auth.currentUser.getIdToken();
+    }
+    return null;
+  };
+
   useEffect(() => {
     const controller = new AbortController();
+    let active = true;
 
     const loadClubs = async () => {
       try {
-        const response = await fetch('/api/clubs', { signal: controller.signal });
+        const token = await getToken();
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch('/api/clubs', { headers, signal: controller.signal });
         if (!response.ok) {
           throw new Error('Unable to load clubs');
         }
         const payload = await response.json();
-        setClubs(payload.clubs || fallbackClubs);
+        if (active) {
+          setClubs(payload.clubs || fallbackClubs);
+        }
       } catch {
-        setClubs(fallbackClubs);
+        if (active) {
+          setClubs(fallbackClubs);
+        }
       }
     };
 
-    loadClubs();
+    Promise.resolve().then(() => {
+      if (active) {
+        loadClubs();
+      }
+    });
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, []);
 
   const handleJoin = async (clubId) => {
@@ -32,9 +59,13 @@ export default function ClubsPage() {
     }
 
     try {
-      const response = await fetch('/api/clubs/join', {
+      const token = await getToken();
+      const response = await fetch('/api/clubs?action=join', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ clubId }),
       });
 
@@ -46,6 +77,9 @@ export default function ClubsPage() {
             : club
         ));
         alert('Welcome! You have successfully joined the club.');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Join failed');
       }
     } catch (err) {
       console.error('Join failed:', err);

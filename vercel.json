@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/admin/(.*)",
+      "destination": "/api/admin?action=$1"
+    },
+    {
       "source": "/api/auth/(.*)",
       "destination": "/api/auth?action=$1"
     },
@@ -32,6 +36,26 @@
     {
       "source": "/api/tests/(.*)",
       "destination": "/api/tests?action=$1"
+    },
+    {
+      "source": "/api/assignments/(.*)",
+      "destination": "/api/assignments?action=$1"
+    },
+    {
+      "source": "/api/attendance/(.*)",
+      "destination": "/api/attendance?action=$1"
+    },
+    {
+      "source": "/api/results/(.*)",
+      "destination": "/api/results?action=$1"
+    },
+    {
+      "source": "/api/courses/:id/students",
+      "destination": "/api/courses?id=$id&action=students"
+    },
+    {
+      "source": "/api/courses/:id/results",
+      "destination": "/api/courses?id=$id&action=results"
     },
     {
       "source": "/(.*)",

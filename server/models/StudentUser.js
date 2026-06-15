@@ -17,6 +17,8 @@ const studentUserSchema = new mongoose.Schema(
     department: { type: String, required: true },
     year: { type: String, required: true },
     semester: { type: String, required: true },
+    batch: { type: String, default: '' },
+    completedCredits: { type: Number, default: 0 },
     gpa: { type: Number, default: 0 },
     status: { type: String, default: 'active' },
     avatarUrl: { type: String, default: '' },

@@ -35,6 +35,22 @@ const buildNoticeFilter = ({ role, category, query }) => {
   return filter;
 };
 
+const decodeToken = async (token) => {
+  if (process.env.NODE_ENV !== 'production' && token.startsWith('mock-')) {
+    const email = token.replace('mock-', '');
+    return {
+      uid: `mock-uid-${email}`,
+      email: email,
+      name: email.split('@')[0],
+      picture: '',
+    };
+  }
+  if (token.startsWith('mock-')) {
+    throw new Error('Mock tokens are not allowed in production');
+  }
+  return await admin.auth().verifyIdToken(token);
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -50,7 +66,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
+    const decoded = await decodeToken(token);
     await connectMongo();
     const profile = await UserProfile.findOne({ uid: decoded.uid }).lean();
     const role = profile?.role || 'student';

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { auth } from '../../firebase';
+import { auth, storage } from '../../firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import useProfile from '../../hooks/useProfile';
 
 const categories = [
@@ -81,6 +82,9 @@ export default function NotesLibrary() {
   const [activeCategory, setActiveCategory] = useState('All Subjects');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [uploadForm, setUploadForm] = useState({
     title: '',
@@ -128,22 +132,124 @@ export default function NotesLibrary() {
   };
 
   useEffect(() => {
-    loadNotes();
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) {
+        loadNotes();
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [searchQuery]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const nameLower = file.name.toLowerCase();
+    const isPdf = file.type === 'application/pdf' || nameLower.endsWith('.pdf');
+    const isRejected =
+      nameLower.endsWith('.exe') ||
+      nameLower.endsWith('.zip') ||
+      nameLower.endsWith('.png') ||
+      nameLower.endsWith('.jpg') ||
+      nameLower.endsWith('.jpeg') ||
+      nameLower.endsWith('.js');
+
+    if (!isPdf || isRejected) {
+      setUploadError('Only PDF files are allowed.');
+      setSelectedFile(null);
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      setUploadError('File size exceeds 20 MB limit.');
+      setSelectedFile(null);
+      e.target.value = '';
+      return;
+    }
+
+    setUploadError('');
+    setSelectedFile(file);
+  };
+
+  const handleCloseModal = () => {
+    if (uploading) return;
+    setShowUploadModal(false);
+    setSelectedFile(null);
+    setUploadError('');
+    setUploadForm({
+      title: '',
+      code: '',
+      topic: '',
+      pages: 1,
+      category: 'All Subjects',
+    });
+  };
 
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     setUploadError('');
 
+    if (!selectedFile) {
+      setUploadError('Please select a PDF file to upload.');
+      return;
+    }
+
+    console.log("TEMPORARY DEBUG - Selected File:", selectedFile);
+    console.log("TEMPORARY DEBUG - Storage Bucket Name:", storage?.app?.options?.storageBucket || "Not found");
+    console.log("TEMPORARY DEBUG - auth.currentUser:", auth.currentUser);
+    console.log("TEMPORARY DEBUG - Is Mock Login:", !!localStorage.getItem('campushub_mock_token'));
+
+    setUploading(true);
+    setUploadProgress(0);
+
     try {
       const token = await getToken();
+      const uniqueFileName = `${Date.now()}-${selectedFile.name}`;
+      const storageRef = ref(storage, `notes/${uniqueFileName}`);
+      const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+      const downloadURL = await new Promise((resolve, reject) => {
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("TEMPORARY DEBUG - Upload Progress:", Math.round(progress));
+            setUploadProgress(Math.round(progress));
+          },
+          (error) => {
+            console.error("TEMPORARY DEBUG - Upload Error Object:", error);
+            reject(error);
+          },
+          async () => {
+            try {
+              const url = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(url);
+            } catch (err) {
+              reject(err);
+            }
+          }
+        );
+      });
+
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token || ''}`,
         },
-        body: JSON.stringify(uploadForm),
+        body: JSON.stringify({
+          ...uploadForm,
+          fileUrl: downloadURL,
+          fileName: selectedFile.name,
+          fileSize: selectedFile.size,
+        }),
       });
 
       if (!response.ok) {
@@ -152,6 +258,7 @@ export default function NotesLibrary() {
       }
 
       setShowUploadModal(false);
+      setSelectedFile(null);
       setUploadForm({
         title: '',
         code: '',
@@ -162,6 +269,9 @@ export default function NotesLibrary() {
       loadNotes();
     } catch (err) {
       setUploadError(err.message);
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -407,7 +517,7 @@ export default function NotesLibrary() {
       </section>
 
       {showUploadModal && (
-        <div style={modalOverlayStyle} onClick={() => setShowUploadModal(false)}>
+        <div style={modalOverlayStyle} onClick={handleCloseModal}>
           <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <h2 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: '700', color: '#101828' }}>
               Upload Notes
@@ -487,6 +597,28 @@ export default function NotesLibrary() {
                 </div>
               </div>
 
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>
+                  PDF File
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    required
+                    style={inputStyle}
+                    onChange={handleFileChange}
+                  />
+                </label>
+              </div>
+
+              {uploading && (
+                <div style={{ margin: '8px 0 16px 0', fontSize: '14px', color: '#344054' }}>
+                  Uploading: {uploadProgress}%
+                  <div style={{ width: '100%', backgroundColor: '#f2f4f7', borderRadius: '4px', height: '8px', marginTop: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${uploadProgress}%`, backgroundColor: '#ff7a00', height: '100%', transition: 'width 0.2s ease-in-out' }} />
+                  </div>
+                </div>
+              )}
+
               {uploadError && (
                 <p style={{ color: '#d92d20', fontSize: '14px', margin: '8px 0 16px 0' }}>{uploadError}</p>
               )}
@@ -494,7 +626,8 @@ export default function NotesLibrary() {
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
                 <button
                   type="button"
-                  onClick={() => setShowUploadModal(false)}
+                  disabled={uploading}
+                  onClick={handleCloseModal}
                   style={{
                     padding: '10px 16px',
                     borderRadius: '8px',
@@ -503,13 +636,15 @@ export default function NotesLibrary() {
                     color: '#344054',
                     fontSize: '14px',
                     fontWeight: '600',
-                    cursor: 'pointer',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    opacity: uploading ? 0.6 : 1,
                   }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  disabled={uploading}
                   style={{
                     padding: '10px 16px',
                     borderRadius: '8px',
@@ -518,10 +653,11 @@ export default function NotesLibrary() {
                     color: '#ffffff',
                     fontSize: '14px',
                     fontWeight: '600',
-                    cursor: 'pointer',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    opacity: uploading ? 0.6 : 1,
                   }}
                 >
-                  Upload
+                  {uploading ? 'Uploading...' : 'Upload'}
                 </button>
               </div>
             </form>

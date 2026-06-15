@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
 
+const questionItemSchema = new mongoose.Schema(
+  {
+    questionText: { type: String, required: true },
+    options: { type: [String], required: true },
+    correctOptionIndex: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
 const mockTestSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
@@ -10,6 +19,7 @@ const mockTestSchema = new mongoose.Schema(
     avgScore: { type: Number, default: 0 },
     participants: { type: Number, default: 0 },
     status: { type: String, default: 'active' },
+    questionsList: { type: [questionItemSchema], default: [] },
   },
   { timestamps: true },
 );

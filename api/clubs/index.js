@@ -1,5 +1,7 @@
+import admin from '../../lib/firebaseAdmin.js';
 import { connectMongo } from '../../lib/connectMongo.js';
 import Club from '../../server/models/Club.js';
+import UserProfile from '../../server/models/UserProfile.js';
 
 const fallbackClubs = [
   {
@@ -67,7 +69,36 @@ const fallbackClubs = [
   },
 ];
 
+const getTokenFromHeader = (req) => {
+  const header = req.headers.authorization || '';
+  return header.startsWith('Bearer ') ? header.slice(7) : null;
+};
+
+const decodeToken = async (token) => {
+  if (process.env.NODE_ENV !== 'production' && token.startsWith('mock-')) {
+    const email = token.replace('mock-', '');
+    return {
+      uid: `mock-uid-${email}`,
+      email: email,
+      name: email.split('@')[0],
+      picture: '',
+    };
+  }
+  if (token.startsWith('mock-')) {
+    throw new Error('Mock tokens are not allowed in production');
+  }
+  return await admin.auth().verifyIdToken(token);
+};
+
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   await connectMongo();
 
   const action = req.query.action?.[0] || req.query.action;
@@ -76,18 +107,29 @@ export default async function handler(req, res) {
       return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    const { clubId } = req.body || {};
-    if (!clubId) {
-      return res.status(400).json({ message: 'clubId is required' });
+    const token = getTokenFromHeader(req);
+    if (!token) {
+      return res.status(401).json({ message: 'Missing auth token' });
     }
 
-    const club = await Club.findByIdAndUpdate(
-      clubId,
-      { $inc: { memberCount: 1 } },
-      { new: true },
-    ).lean();
+    try {
+      await decodeToken(token);
 
-    return res.json({ club });
+      const { clubId } = req.body || {};
+      if (!clubId) {
+        return res.status(400).json({ message: 'clubId is required' });
+      }
+
+      const club = await Club.findByIdAndUpdate(
+        clubId,
+        { $inc: { memberCount: 1 } },
+        { new: true },
+      ).lean();
+
+      return res.json({ club });
+    } catch (error) {
+      return res.status(401).json({ message: 'Unauthorized', error: error?.message || '' });
+    }
   }
 
   if (req.method === 'GET') {
@@ -96,8 +138,25 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const club = await Club.create(req.body || {});
-    return res.status(201).json({ club });
+    const token = getTokenFromHeader(req);
+    if (!token) {
+      return res.status(401).json({ message: 'Missing auth token' });
+    }
+
+    try {
+      const decoded = await decodeToken(token);
+      const profile = await UserProfile.findOne({ uid: decoded.uid }).lean();
+      const role = profile?.role || 'student';
+
+      if (!['faculty', 'admin'].includes(role)) {
+        return res.status(403).json({ message: 'Insufficient role permissions' });
+      }
+
+      const club = await Club.create(req.body || {});
+      return res.status(201).json({ club });
+    } catch (error) {
+      return res.status(401).json({ message: 'Unauthorized', error: error?.message || '' });
+    }
   }
 
   return res.status(405).json({ message: 'Method not allowed' });

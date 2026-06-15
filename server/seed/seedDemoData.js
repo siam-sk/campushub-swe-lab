@@ -10,6 +10,12 @@ import Scholarship from '../models/Scholarship.js';
 import ProfilePage from '../models/ProfilePage.js';
 import SettingsPage from '../models/SettingsPage.js';
 import AssistantMessage from '../models/AssistantMessage.js';
+import Course from '../models/Course.js';
+import Enrollment from '../models/Enrollment.js';
+import Assignment from '../models/Assignment.js';
+import AssignmentSubmission from '../models/AssignmentSubmission.js';
+import Attendance from '../models/Attendance.js';
+import Result from '../models/Result.js';
 
 dotenv.config();
 
@@ -123,38 +129,74 @@ const mockTests = [
   {
     title: 'Data Structures & Algorithms',
     courseCode: 'CSE 201',
-    questions: 50,
+    questions: 3,
     durationMinutes: 60,
     difficulty: 'Medium',
     avgScore: 72,
     participants: 245,
+    questionsList: [
+      {
+        questionText: 'What is the worst-case time complexity of Quick Sort?',
+        options: ['O(n)', 'O(n log n)', 'O(n²)', 'O(log n)'],
+        correctOptionIndex: 2,
+      },
+      {
+        questionText: 'Which data structure uses LIFO (Last In First Out)?',
+        options: ['Queue', 'Stack', 'Heap', 'Tree'],
+        correctOptionIndex: 1,
+      },
+      {
+        questionText: 'Which traversal visits binary tree nodes in sorted order?',
+        options: ['Pre-order', 'Post-order', 'In-order', 'Level-order'],
+        correctOptionIndex: 2,
+      },
+    ],
   },
   {
     title: 'Database Management Systems',
     courseCode: 'CSE 301',
-    questions: 40,
+    questions: 3,
     durationMinutes: 45,
     difficulty: 'Easy',
     avgScore: 78,
     participants: 189,
+    questionsList: [
+      {
+        questionText: 'What does SQL stand for?',
+        options: ['Structured Query Language', 'Structured Question Language', 'Simple Query Language', 'Standard Query Language'],
+        correctOptionIndex: 0,
+      },
+      {
+        questionText: 'Which normal form deals with multi-valued dependency?',
+        options: ['1NF', '2NF', '3NF', '4NF'],
+        correctOptionIndex: 3,
+      },
+      {
+        questionText: 'What database property ensures that a transaction is all-or-nothing?',
+        options: ['Atomicity', 'Consistency', 'Isolation', 'Durability'],
+        correctOptionIndex: 0,
+      },
+    ],
   },
   {
     title: 'Operating Systems Concepts',
     courseCode: 'CSE 302',
-    questions: 45,
+    questions: 0,
     durationMinutes: 50,
     difficulty: 'Medium',
     avgScore: 74,
     participants: 210,
+    questionsList: [],
   },
   {
     title: 'Computer Networks',
     courseCode: 'CSE 303',
-    questions: 55,
+    questions: 0,
     durationMinutes: 60,
     difficulty: 'Hard',
     avgScore: 69,
     participants: 198,
+    questionsList: [],
   },
 ];
 
@@ -418,19 +460,221 @@ const run = async () => {
 
   await ProfilePage.findOneAndUpdate(
     { key: 'default' },
-    { $set: profilePage, $setOnInsert: { key: 'default' } },
+    { $set: profilePage },
     { upsert: true },
   );
 
   await SettingsPage.findOneAndUpdate(
-    { key: 'default' },
-    { $set: settingsPage, $setOnInsert: { key: 'default' } },
+    { userId: 'default' },
+    {
+      $set: {
+        userId: 'default',
+        theme: settingsPage.appearance?.theme || 'orange',
+        darkMode: settingsPage.appearance?.darkMode || false,
+        notificationsEnabled: settingsPage.notifications?.push || true,
+        emailNotifications: settingsPage.notifications?.email || true,
+        smsNotifications: true,
+        language: 'English',
+        accentColor: settingsPage.appearance?.theme || 'orange',
+      }
+    },
     { upsert: true },
   );
 
   if ((await AssistantMessage.countDocuments({ sessionId: 'default' })) === 0) {
     await AssistantMessage.insertMany(assistantMessages);
   }
+
+  const demoCourses = [
+    {
+      title: 'Data Structures & Algorithms',
+      code: 'CSE 3411',
+      dept: 'Dept. of CSE',
+      footer: 'Fall 25 CSE 3411/CSI 311 (H): Data Structures & Algo',
+      accent: 'orange',
+      materials: 12,
+      assignments: 3,
+      facultyEmail: 'faculty@campushub.edu',
+    },
+    {
+      title: 'Electronics',
+      code: 'CSE 2123',
+      dept: 'Dept. of CSE',
+      footer: 'Fall 25 CSE 123/EEE 2123 (E): Electronics',
+      accent: 'blue',
+      materials: 8,
+      assignments: 1,
+      facultyEmail: 'dr.rahman@campushub.edu',
+    },
+    {
+      title: 'System Analysis',
+      code: 'CSE 3412',
+      dept: 'Dept. of CSE',
+      footer: 'Fall 25 CSE 3412/CSI 312 (A): System Analysis',
+      accent: 'sunset',
+      materials: 5,
+      assignments: 2,
+      facultyEmail: 'faculty@campushub.edu',
+    },
+    {
+      title: 'Web Programming',
+      code: 'CSE 4165',
+      dept: 'Dept. of CSE',
+      footer: 'Fall 25 CSE 4165/CSE 465 (K): Web Programming',
+      accent: 'amber',
+      materials: 15,
+      assignments: 4,
+      facultyEmail: 'faculty@campushub.edu',
+    },
+    {
+      title: 'Probability',
+      code: 'CSE 2205',
+      dept: 'Dept. of CSE',
+      footer: 'Fall 25 MATH 2205/STAT 205 (D): Probability',
+      accent: 'gold',
+      materials: 6,
+      assignments: 1,
+      facultyEmail: 'nusrat.jahan@campushub.edu',
+    },
+    {
+      title: 'Data Structures & Algorithms Lab',
+      code: 'CSE 3412-lab',
+      dept: 'Dept. of CSE',
+      footer: 'Fall 25 CSE 3412/CSI 312 (Lab): DS&A Lab',
+      accent: 'gold',
+      materials: 4,
+      assignments: 5,
+      facultyEmail: 'faculty@campushub.edu',
+    },
+  ];
+
+  await upsertMany(Course, demoCourses, ['code']);
+
+  const students = [
+    'student@campushub.edu',
+    'john.student@campushub.edu',
+    'tanvir.hasan@campushub.edu',
+  ];
+
+  const dbCourses = await Course.find();
+  const demoEnrollments = [];
+
+  for (const email of students) {
+    let idx = 0;
+    for (const course of dbCourses) {
+      if (idx % 2 === 0) {
+        demoEnrollments.push({
+          studentEmail: email,
+          courseId: course._id,
+          progress: 40 + (idx * 10) % 60,
+          schedule: idx === 0 ? 'Today, 2:00 PM' : idx === 2 ? 'Tomorrow, 10:00 AM' : 'Wednesday, 11:00 AM',
+        });
+      }
+      idx++;
+    }
+  }
+
+  await Enrollment.deleteMany({ studentEmail: { $in: students } });
+  await Enrollment.insertMany(demoEnrollments);
+
+  await Assignment.deleteMany({});
+  await AssignmentSubmission.deleteMany({});
+
+  const demoAssignments = [];
+  for (const course of dbCourses) {
+    demoAssignments.push({
+      courseId: course._id,
+      title: `${course.title} Assignment 1`,
+      description: `Implement the core concepts discussed in the introductory lectures of ${course.code}.`,
+      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+    demoAssignments.push({
+      courseId: course._id,
+      title: `${course.title} Midterm Project`,
+      description: `Submit your midterm project proposal for review in ${course.code}.`,
+      deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    });
+  }
+  await Assignment.insertMany(demoAssignments);
+
+  await Attendance.deleteMany({});
+  const demoAttendance = [];
+  const statuses = ['Present', 'Present', 'Present', 'Present', 'Absent', 'Late'];
+
+  for (const enrollment of demoEnrollments) {
+    for (let i = 0; i < 10; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const status = statuses[(enrollment.progress + i) % statuses.length];
+
+      demoAttendance.push({
+        studentEmail: enrollment.studentEmail,
+        courseId: enrollment.courseId,
+        date,
+        status,
+      });
+    }
+  }
+  await Attendance.insertMany(demoAttendance);
+
+  // Seed Results
+  await Result.deleteMany({});
+  const demoResults = [];
+  const gradeScale = [
+    { grade: 'A', gp: 4.0 },
+    { grade: 'A-', gp: 3.7 },
+    { grade: 'B+', gp: 3.3 },
+    { grade: 'B', gp: 3.0 },
+    { grade: 'B-', gp: 2.7 },
+    { grade: 'C+', gp: 2.3 },
+    { grade: 'C', gp: 2.0 },
+    { grade: 'C-', gp: 1.7 },
+    { grade: 'D+', gp: 1.3 },
+    { grade: 'D', gp: 1.0 },
+    { grade: 'F', gp: 0.0 }
+  ];
+
+  const coursesTemplate = [
+    { sem: 'Semester 1', code: 'CSE 1111', title: 'Structured Programming', credit: 3, baseIdx: 0 },
+    { sem: 'Semester 1', code: 'CSE 1112', title: 'Structured Programming Lab', credit: 1, baseIdx: 1 },
+    { sem: 'Semester 1', code: 'MATH 1151', title: 'Calculus I', credit: 3, baseIdx: 2 },
+    { sem: 'Semester 1', code: 'ENG 1011', title: 'English Composition', credit: 3, baseIdx: 0 },
+
+    { sem: 'Semester 2', code: 'CSE 2111', title: 'Object Oriented Programming', credit: 3, baseIdx: 3 },
+    { sem: 'Semester 2', code: 'CSE 2112', title: 'Object Oriented Programming Lab', credit: 1, baseIdx: 0 },
+    { sem: 'Semester 2', code: 'CSE 2213', title: 'Discrete Mathematics', credit: 3, baseIdx: 4 },
+    { sem: 'Semester 2', code: 'MATH 2183', title: 'Linear Algebra', credit: 3, baseIdx: 2 },
+
+    { sem: 'Semester 3', code: 'CSE 3411', title: 'Data Structures & Algorithms', credit: 3, baseIdx: 1 },
+    { sem: 'Semester 3', code: 'CSE 3412-lab', title: 'Data Structures & Algorithms Lab', credit: 1, baseIdx: 0 },
+    { sem: 'Semester 3', code: 'CSE 2123', title: 'Electronics', credit: 3, baseIdx: 3 },
+    { sem: 'Semester 3', code: 'CSE 2205', title: 'Probability & Statistics', credit: 3, baseIdx: 4 },
+
+    { sem: 'Semester 4', code: 'CSE 3412', title: 'System Analysis', credit: 3, baseIdx: 0 },
+    { sem: 'Semester 4', code: 'CSE 4165', title: 'Web Programming', credit: 3, baseIdx: 1 },
+    { sem: 'Semester 4', code: 'CSE 3011', title: 'Database Management Systems', credit: 3, baseIdx: 2 },
+    { sem: 'Semester 4', code: 'CSE 3012', title: 'Database Management Systems Lab', credit: 1, baseIdx: 0 },
+  ];
+
+  for (const email of students) {
+    const studentOffset = email.startsWith('john') ? 1 : email.startsWith('tanvir') ? 2 : 0;
+    for (const c of coursesTemplate) {
+      const gradeObj = gradeScale[(c.baseIdx + studentOffset) % gradeScale.length];
+      demoResults.push({
+        studentEmail: email,
+        semester: c.sem,
+        courseCode: c.code,
+        courseTitle: c.title,
+        credit: c.credit,
+        grade: gradeObj.grade,
+        gradePoint: gradeObj.gp
+      });
+    }
+  }
+
+  await Result.insertMany(demoResults);
 
   console.log('Demo data seeded.');
   process.exit(0);

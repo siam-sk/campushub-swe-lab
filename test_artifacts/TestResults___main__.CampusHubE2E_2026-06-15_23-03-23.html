@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CampusHub E2E Report</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2 class="text-capitalize">CampusHub E2E Report</h2>
+                <p class='attribute'><strong>Start Time: </strong>2026-06-15 23:03:23</p>
+                <p class='attribute'><strong>Duration: </strong>244 ms</p>
+                <p class='attribute'><strong>Summary: </strong>Total: 5, Pass: 0, Error: 5</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-10 col-md-10">
+                <table class='table table-hover table-responsive'>
+                    <thead>
+                        <tr>
+                            <th>__main__.CampusHubE2E</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class='warning'>
+                            <td class="col-xs-10">test_admin_flow</td>
+                            <td class="col-xs-1">
+                                <span class="label label-warning" style="display:block;width:40px;">Error</span>
+                            </td>
+                            <td class="col-xs-1">
+                                <button class="btn btn-default btn-xs">View</button>
+                            </td>
+                        </tr>
+                        <tr style="display:none;">
+                            <td class="col-xs-9" colspan="3"><p style="color:maroon;">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+</p><p style="color:maroon;">Traceback (most recent call last):
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/campushub_e2e.py", line 55, in setUp
+    self.driver.get(f"{BASE_URL}/auth")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 488, in get
+    self.execute(Command.GET, {"url": url})
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 468, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+
+</p>
+                            </td>
+                        </tr>
+                        <tr class='warning'>
+                            <td class="col-xs-10">test_faculty_course_management</td>
+                            <td class="col-xs-1">
+                                <span class="label label-warning" style="display:block;width:40px;">Error</span>
+                            </td>
+                            <td class="col-xs-1">
+                                <button class="btn btn-default btn-xs">View</button>
+                            </td>
+                        </tr>
+                        <tr style="display:none;">
+                            <td class="col-xs-9" colspan="3"><p style="color:maroon;">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+</p><p style="color:maroon;">Traceback (most recent call last):
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/campushub_e2e.py", line 55, in setUp
+    self.driver.get(f"{BASE_URL}/auth")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 488, in get
+    self.execute(Command.GET, {"url": url})
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 468, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+
+</p>
+                            </td>
+                        </tr>
+                        <tr class='warning'>
+                            <td class="col-xs-10">test_logout</td>
+                            <td class="col-xs-1">
+                                <span class="label label-warning" style="display:block;width:40px;">Error</span>
+                            </td>
+                            <td class="col-xs-1">
+                                <button class="btn btn-default btn-xs">View</button>
+                            </td>
+                        </tr>
+                        <tr style="display:none;">
+                            <td class="col-xs-9" colspan="3"><p style="color:maroon;">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+</p><p style="color:maroon;">Traceback (most recent call last):
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/campushub_e2e.py", line 55, in setUp
+    self.driver.get(f"{BASE_URL}/auth")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 488, in get
+    self.execute(Command.GET, {"url": url})
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 468, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+
+</p>
+                            </td>
+                        </tr>
+                        <tr class='warning'>
+                            <td class="col-xs-10">test_notice_board_filters</td>
+                            <td class="col-xs-1">
+                                <span class="label label-warning" style="display:block;width:40px;">Error</span>
+                            </td>
+                            <td class="col-xs-1">
+                                <button class="btn btn-default btn-xs">View</button>
+                            </td>
+                        </tr>
+                        <tr style="display:none;">
+                            <td class="col-xs-9" colspan="3"><p style="color:maroon;">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+</p><p style="color:maroon;">Traceback (most recent call last):
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/campushub_e2e.py", line 55, in setUp
+    self.driver.get(f"{BASE_URL}/auth")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 488, in get
+    self.execute(Command.GET, {"url": url})
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 468, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+
+</p>
+                            </td>
+                        </tr>
+                        <tr class='warning'>
+                            <td class="col-xs-10">test_student_profile_and_messages</td>
+                            <td class="col-xs-1">
+                                <span class="label label-warning" style="display:block;width:40px;">Error</span>
+                            </td>
+                            <td class="col-xs-1">
+                                <button class="btn btn-default btn-xs">View</button>
+                            </td>
+                        </tr>
+                        <tr style="display:none;">
+                            <td class="col-xs-9" colspan="3"><p style="color:maroon;">WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+</p><p style="color:maroon;">Traceback (most recent call last):
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/campushub_e2e.py", line 55, in setUp
+    self.driver.get(f"{BASE_URL}/auth")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 488, in get
+    self.execute(Command.GET, {"url": url})
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/webdriver.py", line 468, in execute
+    self.error_handler.check_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/run/media/shaki/2472D89F72D87750/Apps/CampusHub_Soft/campushub-swe-lab/venv/lib/python3.14/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=149.0.7827.114)
+Stacktrace:
+#0 0x64d6a757a29a <unknown>
+#1 0x64d6a6f5c449 <unknown>
+#2 0x64d6a6f53343 <unknown>
+#3 0x64d6a6f44221 <unknown>
+#4 0x64d6a6f45f95 <unknown>
+#5 0x64d6a6f4471a <unknown>
+#6 0x64d6a6f43da9 <unknown>
+#7 0x64d6a6f439c6 <unknown>
+#8 0x64d6a6f415ab <unknown>
+#9 0x64d6a6f41df0 <unknown>
+#10 0x64d6a6f5feed <unknown>
+#11 0x64d6a6ff99db <unknown>
+#12 0x64d6a6ff8cbf <unknown>
+#13 0x64d6a6fa4132 <unknown>
+#14 0x64d6a6fa4f41 <unknown>
+#15 0x64d6a7540737 <unknown>
+#16 0x64d6a753ef39 <unknown>
+#17 0x64d6a7529c26 <unknown>
+#18 0x64d6a753fada <unknown>
+#19 0x64d6a7511bd0 <unknown>
+#20 0x64d6a7566c28 <unknown>
+#21 0x64d6a7566dc5 <unknown>
+#22 0x64d6a7578e1e <unknown>
+#23 0x75a79b8a40da <unknown>
+#24 0x75a79b9377ac <unknown>
+
+</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                Total: 5, Pass: 0, Error: 5 -- Duration: 244 ms
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('td').on('click', '.btn', function(e){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                var $this = $(this);
+                var $nextRow = $this.closest('tr').next('tr');
+                $nextRow.slideToggle("fast");
+                $this.text(function(i, text){
+                    if (text === 'View') {
+                        return 'Hide';
+                    } else {
+                        return 'View';
+                    };
+                });
+            });
+        });
+    </script>
+</body>
+</html
