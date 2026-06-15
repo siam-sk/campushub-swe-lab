@@ -1,6 +1,43 @@
 import { useEffect, useState } from 'react';
 
-const fallbackClubs = [];
+const fallbackClubs = [
+  {
+    _id: '1',
+    name: 'Computer Club',
+    summary: 'Programming and software development activities',
+    description:
+      'Join coding competitions, workshops and software projects.',
+    memberCount: 120,
+    date: 'Every Friday',
+    time: '3:00 PM',
+    venue: 'Room 504',
+    isJoined: false,
+  },
+  {
+    _id: '2',
+    name: 'Photography Club',
+    summary: 'Photography and creative media',
+    description:
+      'Learn photography skills and participate in photo walks.',
+    memberCount: 75,
+    date: 'Saturday',
+    time: '4:00 PM',
+    venue: 'Auditorium',
+    isJoined: false,
+  },
+  {
+    _id: '3',
+    name: 'Sports Club',
+    summary: 'Sports and fitness activities',
+    description:
+      'Participate in football, cricket and indoor games.',
+    memberCount: 95,
+    date: 'Sunday',
+    time: '5:00 PM',
+    venue: 'University Field',
+    isJoined: false,
+  },
+];
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState(fallbackClubs);
@@ -68,9 +105,9 @@ export default function ClubsPage() {
         </div>
         <div className="clubs-actions">
           <button type="button" onClick={() => alert('Viewing Upcoming Events...')}>Events</button>
-          <button type="button">Dashboard</button>
+          <button type="button" onClick={() => window.location.href = '/dashboard'}>Dashboard</button>
           <button type="button" className="active">Clubs</button>
-          <button type="button">Log Out</button>
+          <button type="button" onClick={() => { localStorage.clear(); window.location.href = '/auth'; }}>Log Out</button>
         </div>
       </section>
 
