@@ -6,8 +6,6 @@ import authRoutes from './routes/auth.js'
 import dashboardRoutes from './routes/dashboard.js'
 import noticeRoutes from './routes/notices.js'
 import facultyRoutes from './routes/faculty.js'
-import messageRoutes from './routes/messages.js'
-import settingsRoutes from './routes/settings.js'
 import { connectMongo } from './db/connectMongo.js'
 
 dotenv.config()
@@ -23,8 +21,6 @@ app.use('/api/auth', authRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/notices', noticeRoutes)
 app.use('/api/faculty', facultyRoutes)
-app.use('/api/messages', messageRoutes)
-app.use('/api/settings', settingsRoutes)
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'campushub-api' })
